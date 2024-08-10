@@ -1,0 +1,98 @@
+{%extends 'template.html'%}
+{%block content%}
+<div id="all-content" class="space-y-4 pt-12">
+    <content id="content-base" class="space-y-4">
+        <a class="tracking-wide font-bold text-2xl">Tentang Sistem</a>
+        <p class="text-justify pb-8">
+            Ini adalah sistem yang digunakan untuk melakukan pencarian dan pengumpulan data berupa publikasi ilmiah dosen.
+            Sistem ini akan untuk mengambil publikasi ilmiah dosen program studi Informatika UIN
+            Sunan Kalijaga Yogyakarta dari Google Scholar.
+            Hasil dari sistem ini adalah tabel yang berisi "Query Pencarian" "Penulis", "Judul Penelitian", "URL Judul Penelitian", "Sitasi",
+            "URL sitasi", dan "Tahun Publikasi".
+        </p>
+
+        <a class="tracking-wide font-bold text-lg">Panduan Penggunaan Sistem</a>
+        <p class="text-justify">
+            Berikut adalah panduan singkat penggunaan sistem ini:
+        </p>
+
+        <div class="flex flex-row justify-between text-justify text-sm text-slate-700 pb-8">
+            <div class="max-w-64 max-h-64 shadow-md rounded p-4">
+                <ol class="flex items-center w-full text-white pb-4">
+                    <li
+                        class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-100 after:border-4 after:inline-block after:border-gray-500">
+                        <span
+                            class="flex items-center justify-center w-6 h-6 bg-gray-500 rounded-full shrink-0">
+                            1
+                        </span>
+                    </li>
+                </ol>
+                <p>Masuk ke halaman <a href="{{ url_for('authors') }}" class="underline font-bold">Pencarian</a> atau melalui tombol <a href="#bottom" class="underline font-bold">Mulai</a> yang terdapat di bawah halaman dan
+                    lakukan pencarian untuk dosen yang akan diambil data publikasi ilmiahnya. Pencarian dapat dilakukan untuk lebih dari satu
+                    dosen secara bersamaan.</p>
+            </div>
+            <div class="max-w-64 max-h-64 shadow-md rounded p-4">
+                <ol class="flex items-center w-full text-white pb-4">
+                    <li
+                        class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-100 after:border-4 after:inline-block after:border-gray-500">
+                        <span
+                            class="flex items-center justify-center w-6 h-6 bg-gray-500 rounded-full shrink-0">
+                            2
+                        </span>
+                    </li>
+                </ol>
+                <p><strong>Pilih</strong> dosen yang berhasil ditampilkan dari hasil pencarian. Proses tarik data publikasi ilmiah dapat dilakukan
+                    untuk satu dosen atau banyak dosen secara bersamaan.</p>
+            </div>
+            <div class="max-w-64 max-h-64 shadow-md rounded p-4">
+                <ol class="flex items-center w-full text-white pb-4">
+                    <li
+                        class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-100 after:border-4 after:inline-block after:border-gray-500">
+                        <span
+                            class="flex items-center justify-center w-6 h-6 bg-gray-500 rounded-full shrink-0">
+                            3
+                        </span>
+                    </li>
+                </ol>
+                <p>Lihat hasil tarik data publikasi ilmiag dengan mengklik tombol <strong>Lihat Data</strong> atau mengunjungi halaman <a
+                        href="{{ url_for('results') }}" class="underline font-bold">Hasil Pencarian</a>.</p>
+            </div>
+            <div class="max-w-64 max-h-64 shadow-md rounded p-4">
+                <ol class="flex items-center w-full text-white pb-4">
+                    <li
+                        class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-100 after:border-4 after:inline-block after:border-gray-500">
+                        <span
+                            class="flex items-center justify-center w-6 h-6 bg-gray-500 rounded-full shrink-0">
+                            4
+                        </span>
+                    </li>
+                </ol>
+                <p>Unduh data publikasi ilmiah dosen dalam bentuk excel atau PDF pada halaman <a
+                        href="{{ url_for('results') }}" class="underline font-bold">Hasil Pencarian</a> atau
+                    pada halaman <a href="{{ url_for('all_results') }}" class="underline font-bold">Semua
+                        Hasil Pencarian</a>.</p>
+            </div>
+
+        </div>
+       
+
+
+        <a class="tracking-wide font-bold text-lg">Tentang Query pencarian</a>
+        <p class="text-justify pb-2">
+            Query pencarian adalah keyword yang terdiri dari <a class="bg-gray-50 p-1">nama dosen</a> yang sesuai dengan
+            profil Google Scholar.
+            Sistem ini akan menggunakan query pencarian tersebut untuk melakukan pencarian profil dosen dan mengumpulkan data
+            publikasi ilmiah dosen.
+        </p>
+    </content>
+
+    <form class="py-2 text-center justify-center" id="bottom">
+        <a href="{{ url_for('authors') }}"
+            class="text-white text-sm text-center py-2 px-4 bg-blue-600 rounded hover:bg-blue-800">
+            Mulai
+        </a>
+        <p class="text-sm pt-2 text-slate-500">Klik mulai untuk melakukan pencarian!</p>
+    </form>
+
+</div>
+{%endblock%}

@@ -1,0 +1,91 @@
+{%extends 'template.html'%}
+{% block title %}
+Riwayat Pencarian
+{% endblock %}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/authors' %}
+                    text-yellow-600
+                    {% else %}
+                    hover:text-yellow-800 self-center
+                    {% endif %}" href="{{ url_for('authors') }}">
+                    <i class="fa-solid fa-magnifying-glass mr-2"></i>
+                        <span class="mr-2">Pencarian</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/authors/history_get_articles' %}
+                        text-yellow-600
+                        {% else %}
+                        self-center
+                        {% endif %}">
+                        <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
+                        <span>Riwayat Tarik Data</span>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <content id="content-base" class="space-y-4">
+        <a class="tracking-wide font-bold text-2xl">Riwayat Tarik Data</a>
+
+        <p class="tracking-wide pt-8">Menampilkan riwayat pencarian:</p>
+
+        <form id="crawlingForm" method="POST" enctype="multipart/form-data">
+            <div id="content-table" class="overflow-x-auto pb-8">
+                <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                    <thead class="text-sm text-gray-700 uppercase">
+                        <tr class="text-left border-b-2">
+                            <th scope="col" class="px-4 py-4">No</th>
+                            <th scope="col" class="px-4 py-4">Dosen</th>
+                            <th scope="col" class="px-4 py-4">Program Studi</th>
+                            <th scope="col" class="px-4 py-4">Riwayat Tarik Data</th>
+                            <th scope="col" class="px-4 py-4">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody" class="text-gray-700">
+                        {% if history%}
+                        {% for author in history %}
+                        <tr class="border-b">
+                            <td class="px-4 py-2">{{ loop.index }}</td>
+                            <td class="px-4 py-2 items-center flex flex-row self-center">
+                                <a href="{{ author.thumbnail }} " target="_blank">
+                                    <img src="{{ author.thumbnail }}" class="w-12 h-12 object-cover rounded-full">
+                                </a>
+                                <a class="ml-4 capitalize">{{author.query}}</a>
+                            </td>
+                            <td class="px-4 py-2">{{author.prodi}}</td>
+                            <td class="px-4 py-2">
+                                {{ author.updated_at }}
+                            </td>
+                            <td class="px-4 py-2">
+                                <a href="{{ url_for('all_results_search_author', query=author.query) }}"
+                                    class="text-white text-sm text-center py-2 px-4 bg-blue-600 rounded hover:bg-blue-800">
+                                    Lihat
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+        </form>
+    </content>
+
+</div>
+{%endblock%}

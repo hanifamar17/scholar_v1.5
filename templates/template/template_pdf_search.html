@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview PDF</title>
+
+    <!-- Fonts -->
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css?family=Nunito|Work+Sans:200,400&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!--Replace with your tailwind.css once created-->
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,400&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/3ddb5c222d.js" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #dcfc85;
+        }
+        thead {
+            display: table-header-group;
+        }
+        footer {
+            text-align: center;
+            font-size: 10px;
+            bottom: 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <div id="all-content">
+        <img src="https://drive.google.com/uc?id=1FDbxsC1FsPuuSgG-fTyQFyLFOe6MjffN" alt="Logo UIN" class="pb-8">
+        
+<!--
+        <nav id="container-parent" class="border-b" style="overflow: auto; text-align: center; vertical-align: auto; padding-bottom: 20px; align-self: center;">
+            <div id="container-child-1" style="float: left; text-align: left;">
+                <a class="text-xs tracking-wide">UNIVERSITAS ISLAM NEGERI<br></a>
+                <a class="text-xl tracking-wide">SUNAN KALIJAGA<br></a>
+                <a class="text-sm tracking-widest">Y O G Y A K A R T A</a>
+            </div>
+            <div id="container-child-2" style="float: right; text-align: right; align-self: center;">
+                <a>SISTEM INFORMASI<br></a>
+                <a>PENCARIAN DATA PENELITIAN</a>
+            </div>
+        </nav>
+-->        
+        <content id="content-base">
+            <h3 class="tracking-wide font-medium text-lg text-center py-8 uppercase" style="padding-top: 20px;">Hasil Pencarian Data Penelitian</h3>
+            </p>
+
+            <div id="content-table" class="shadow-md sm:rounded-lg pb-8">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400" id="dataTable">
+                    <thead class="text-sm text-gray-700 uppercase bg-gray-100">
+                        <tr class="text-left border">
+                            <th scope="col" class="px-3 py-3 border">No</th>
+                            <th scope="col" class="px-3 py-3 border w-1/5">Penulis</th>
+                            <th scope="col" class="px-3 py-3 border">Judul Penelitian</th>
+                            <th scope="col" class="px-3 py-3 border">Dikutip oleh</th>
+                            <th scope="col" class="px-3 py-3 border">Tahun Publikasi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        {% for row in query %}
+                        <tr class="border">
+                            <td class="px-3 py-2 border" style="text-align: center;">{{ loop.index }}</td>
+                            <td class="px-3 py-2 border">{{ row[1] }}</td>
+                            <td class="px-3 py-2 border"><a href="{{row[3]}}" target="_blank">{{row[2]}}</a></td>
+                            <td class="px-3 py-2 border" style="text-align: center;"><a href="{{ row[5] }}" target="_blank">{{ row[4]
+                                    }}</a></td>
+                            <td class="px-3 py-2" style="text-align: center;">{{ row[6] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </content>
+    </div>
+</body>

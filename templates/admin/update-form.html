@@ -1,0 +1,38 @@
+{%extends 'template.html'%}
+{%block content%}
+<div id="all-content" class="p-4 space-y-4 pt-12">
+    <content id="content-base" class="space-y-4">
+        <h3 class="tracking-wide font-bold text-2xl">Perbarui Admin</h3>
+        <p class="mb-2 font-normal">Perbarui username dan password admin!
+        </p>
+
+        <form action="{{ url_for('admin_update', id=admin[0]) }}" method="POST" enctype="multipart/form-data">
+            <div class="py-8">
+                <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 px-4 py-2 space-y-1">
+                    <label for="username" class="self-center text-gray-600">Username</label>
+                    <div class="relative z-0 w-full mb-5">
+                        <input type="text" name="username" id="username" value="{{ admin[1] }}" autocomplete="username" required
+                            class="pt-3 pb-2 px-3 block w-full mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200" />
+                    </div>
+                </div>
+                <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 px-4 py-2 space-y-1">
+                    <label for="password" class="self-center text-gray-600">Password</label>
+                    <div class="relative z-0 w-full mb-5">
+                        <input type="text" name="password" id="password" value="{{ admin[2] }}" autocomplete="password" required
+                            class="pt-3 pb-2 px-3 block w-full mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200" />
+                    </div>
+                </div>
+
+                <div class="flex flex-row justify-between text-center text-base pt-8">
+                    <a href="{{ url_for('admin') }}"" class=" text-black hover:text-white hover:bg-slate-800 rounded
+                        border py-2.5 px-6">
+                        Kembali
+                    </a>
+                    <button type="submit"
+                        class="text-white bg-blue-600 hover:bg-blue-800 rounded shadow-md py-2.5 px-6">Update</button>
+                </div>
+        </form>
+    </content>
+</div>
+
+{%endblock%}

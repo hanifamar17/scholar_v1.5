@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Selamat Datang{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='css/logo_uin.ico') }}" type="image/x-icon">
+    <!-- Fonts -->
+    <!--   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!--Replace with your tailwind.css once created-->
+    <script src="https://kit.fontawesome.com/3ddb5c222d.js" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <!--
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+    -->
+</head>
+
+<body class="bg-white text-slate-800">
+    <!--HEADER-->
+    <nav id="header" class="w-full z-50 top-0 bg-white px-24 shadow-md sticky">
+        <div class="flex flex-row py-1 justify-between font-normal text-yellow-600">
+            <div class="space-x-4 py-2 flex flex-row">
+                <!--LOGO-->
+                <div class="object-left">
+                    <a><img src="{{ url_for('static', filename='css/logo_uin.png')}}" class="w-12"></a>
+                </div>
+                <!--NAME-->
+                <div class="text-center flex flex-col leading-normal">
+                    <p class="text-xs tracking-wide">UNIVERSITAS ISLAM NEGERI</p>
+                    <p class="text-lg tracking-wide">SUNAN KALIJAGA</p>
+                    <p class="text-xs tracking-widest">Y O G Y A K A R T A</p>
+                </div>
+            </div>
+            <div class="text-sm my-auto tracking-wide">
+                    <div class="relative space-y-2">
+                        <button id="dropdownProject" data-dropdown-toggle="dropdown-project" class="text-right px-3 py-2 rounded-md hover:bg-gray-50">
+                            <span>
+                                Halo,</span><br>
+                            <span class="font-bold capitalize">{{ current_user.username }}</span>
+                        </button>
+                        <div id="dropdown-project" class="absolute hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-28">
+                            <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefault">
+                                <li>
+                                    <a href="/admin" class="block px-4 py-2 hover:bg-gray-100">
+                                        <i class="fa-solid fa-user mr-2"></i>
+                                        <span>Admin</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/dosen" class="block px-4 py-2 hover:bg-gray-100">
+                                        <i class="fa-solid fa-users mr-2"></i>
+                                        <span>Dosen</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefault">
+                                <li>
+                                    <a href="/logout" class="block px-4 py-2 hover:bg-gray-100">
+                                        <i class="fa-solid fa-right-from-bracket mr-2"></i>
+                                        <span>Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                
+                
+            </div>
+            <script>
+                document.getElementById('dropdownProject').addEventListener('click', function() {
+                    var dropdown = document.getElementById('dropdown-project');
+                    dropdown.classList.toggle('hidden');
+                });
+    
+                // Optional: Hide the dropdown when clicking outside of it
+                document.addEventListener('click', function(event) {
+                    var dropdown = document.getElementById('dropdown-project');
+                    var button = document.getElementById('dropdownProject');
+                    if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            </script>
+            
+        </div>
+
+        <div class="flex justify-center items-center space-x-4">
+
+            <a class=" inline-flex items-center px-4 py-1 text-base text-center
+                {% if request.path == '/dashboard' %}
+                text-yellow-600 border-b-2 border-yellow-800
+                {% else %}
+                hover:text-yellow-600 self-center
+                {% endif %}" href="{{ url_for('index') }}">Dashboard</a>
+
+
+            <a class="inline-flex items-center px-4 py-1 text-base text-center
+                {% if request.path == '/authors' or request.path == '/authors/history_get_articles' or request.path == '/authors/get_profiles' %}
+                text-yellow-600 border-b-2 border-yellow-800
+                {% else %}
+                hover:text-yellow-600 self-center
+                {% endif %}" href="{{ url_for('authors') }}">Pencarian</a>
+
+
+            <a class="inline-flex items-center px-4 py-1 text-base text-center
+                {% if request.path == '/results' or request.path == '/all_results' or request.path == '/all_results/search-author' 
+                or request.path == '/search_bar_author' or request.path == '/all_results/search_bar' %}
+                text-yellow-600 border-b-2 border-yellow-800
+                {% else %}
+                hover:text-yellow-600 self-center
+                {% endif %}" href="{{ url_for('results') }}">Hasil Pencarian</a>
+        </div>
+    </nav>
+
+
+    <script>
+        let prevScrollpos = window.pageYOffset;
+        window.onscroll = function () {
+            let currentScrollPos = window.pageYOffset;
+            if (prevScrollpos > currentScrollPos) {
+                document.getElementById("header").style.top = "0";
+            } else {
+                document.getElementById("header").style.top = "-100px";
+            }
+            prevScrollpos = currentScrollPos;
+        }
+    </script>
+
+
+    <div class="bg-white rounded overflow-auto px-24">
+        <div class="space-y-6">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <footer class="p-6">
+            <div class="pt-8">
+                <div class="text-center">
+                    <hr class="pt-6">
+                    <p>&copy; 2024 Informatika UIN Sunan Kalijaga Yogyakarta. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+
+</html>

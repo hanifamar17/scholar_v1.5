@@ -1,0 +1,41 @@
+{%extends 'template.html'%}
+{% block title %}
+Error
+{% endblock %}
+{%block content%}
+<div id="all-content" class="space-y-4 pt-12">
+
+    <content id="content-base" class="space-y-4">
+        <div class="bg-gray-100 p-6">
+            <h1 class="font-bold">Error:</h1>
+            <p>{{ error }}</p>
+        </div>
+
+        {% if request.path == url_for('history_get_articles') %}
+        <div class="pt-4">
+        <a href="{{ url_for('authors') }}" class=" text-black hover:text-white hover:bg-slate-800 rounded border py-2.5
+            px-6">
+            Kembali
+        </a>
+    </div>
+        {% elif request.path == url_for('all_results') %}
+        <div class="pt-4">
+            <a href="{{ url_for('results') }}" class=" text-black hover:text-white hover:bg-slate-800 rounded border py-2.5
+            px-6">
+            Kembali
+        </a>
+        </div>
+        {% elif request.path == url_for('dosen') %}
+        <div class="pt-4">
+            <a href="{{ url_for('index') }}" class=" text-black hover:text-white hover:bg-slate-800 rounded border py-2.5
+            px-6">
+            Kembali
+        </a>
+        </div>
+        {% else %}
+        {% endif %}
+
+    </content>
+
+</div>
+{%endblock%}

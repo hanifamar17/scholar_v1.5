@@ -1,0 +1,73 @@
+2024-07-18 16:07:30,185 INFO werkzeug [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4040
+ * Running on http://10.200.240.116:4040
+2024-07-18 16:07:30,186 INFO werkzeug [33mPress CTRL+C to quit[0m
+2024-07-18 16:07:30,197 INFO werkzeug  * Restarting with stat
+2024-07-18 16:07:31,999 WARNING werkzeug  * Debugger is active!
+2024-07-18 16:07:32,007 INFO werkzeug  * Debugger PIN: 174-047-042
+2024-07-18 16:08:21,514 INFO werkzeug  * Detected change in 'C:\\scholar_crawler v1.4\\scholar_crawler\\scholar\\scholar\\spiders\\scholar_spider_4.py', reloading
+2024-07-18 16:08:21,667 INFO werkzeug  * Restarting with stat
+2024-07-18 16:08:22,854 WARNING werkzeug  * Debugger is active!
+2024-07-18 16:08:22,859 INFO werkzeug  * Debugger PIN: 174-047-042
+2024-07-18 16:08:29,412 INFO werkzeug [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4040
+ * Running on http://10.200.240.116:4040
+2024-07-18 16:08:29,412 INFO werkzeug [33mPress CTRL+C to quit[0m
+2024-07-18 16:08:29,418 INFO werkzeug  * Restarting with stat
+2024-07-18 16:08:30,529 WARNING werkzeug  * Debugger is active!
+2024-07-18 16:08:30,538 INFO werkzeug  * Debugger PIN: 174-047-042
+2024-07-18 16:09:23,323 INFO werkzeug [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4040
+ * Running on http://10.200.240.116:4040
+2024-07-18 16:09:23,323 INFO werkzeug [33mPress CTRL+C to quit[0m
+2024-07-18 16:09:23,327 INFO werkzeug  * Restarting with stat
+2024-07-18 16:09:24,444 WARNING werkzeug  * Debugger is active!
+2024-07-18 16:09:24,449 INFO werkzeug  * Debugger PIN: 174-047-042
+2024-07-18 16:09:43,275 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:43] "GET / HTTP/1.1" 200 -
+2024-07-18 16:09:43,337 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:43] "GET /static/css/logo_uin.png HTTP/1.1" 200 -
+2024-07-18 16:09:46,050 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-18 16:09:51,905 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:51] "GET /author HTTP/1.1" 200 -
+2024-07-18 16:09:51,962 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:51] "[36mGET /static/css/logo_uin.png HTTP/1.1[0m" 304 -
+2024-07-18 16:09:56,215 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:56] "GET / HTTP/1.1" 200 -
+2024-07-18 16:09:56,530 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:09:56] "[36mGET /static/css/logo_uin.png HTTP/1.1[0m" 304 -
+2024-07-18 16:10:16,056 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:16] "GET /author HTTP/1.1" 200 -
+2024-07-18 16:10:16,188 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:16] "[36mGET /static/css/logo_uin.png HTTP/1.1[0m" 304 -
+2024-07-18 16:10:17,942 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:17] "GET /crawler HTTP/1.1" 200 -
+2024-07-18 16:10:18,230 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:18] "[36mGET /static/css/logo_uin.png HTTP/1.1[0m" 304 -
+2024-07-18 16:10:47,647 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:47] "GET /show-error HTTP/1.1" 200 -
+2024-07-18 16:10:47,736 INFO werkzeug 127.0.0.1 - - [18/Jul/2024 16:10:47] "[36mGET /static/css/logo_uin.png HTTP/1.1[0m" 304 -
+2024-07-18 16:12:45,164 INFO werkzeug  * Detected change in 'C:\\scholar_crawler v1.4\\scholar_crawler\\scholar\\main.py', reloading
+2024-07-18 16:12:45,350 INFO werkzeug  * Restarting with stat
+2024-07-18 16:20:28,946 INFO werkzeug  * Restarting with stat
+2024-07-18 16:20:41,561 INFO werkzeug  * Restarting with stat
+2024-07-18 16:22:22,533 INFO werkzeug  * Restarting with stat
+2024-07-18 16:23:22,558 INFO werkzeug  * Restarting with stat
+2024-07-18 16:26:45,436 INFO werkzeug  * Restarting with stat
+2024-07-18 16:29:20,647 INFO werkzeug  * Restarting with stat
+2024-07-18 16:34:48,123 INFO werkzeug  * Restarting with stat
+2024-07-18 16:41:48,383 INFO werkzeug  * Restarting with stat
+2024-07-18 16:43:27,479 INFO werkzeug  * Restarting with stat
+2024-07-18 16:45:33,261 INFO werkzeug  * Restarting with stat
+2024-07-18 16:47:18,208 INFO werkzeug  * Restarting with stat
+2024-07-18 17:06:04,242 INFO werkzeug  * Restarting with stat
+2024-07-18 17:07:13,903 INFO werkzeug  * Restarting with stat
+2024-07-18 17:08:20,564 INFO werkzeug  * Restarting with stat
+2024-07-18 17:08:46,082 INFO werkzeug  * Restarting with stat
+2024-07-18 17:09:34,330 INFO werkzeug  * Restarting with stat
+2024-07-18 17:10:10,978 INFO werkzeug  * Restarting with stat
+2024-07-18 17:11:27,849 INFO werkzeug  * Restarting with stat
+2024-07-18 17:13:20,415 INFO werkzeug  * Restarting with stat
+2024-07-18 17:14:17,062 INFO werkzeug  * Restarting with stat
+2024-07-18 17:15:54,128 INFO werkzeug  * Restarting with stat
+2024-07-18 17:16:13,781 INFO werkzeug  * Restarting with stat
+2024-07-18 17:18:06,528 INFO werkzeug  * Restarting with stat
+2024-07-18 17:19:37,679 INFO werkzeug  * Restarting with stat
+2024-07-18 17:19:42,976 INFO werkzeug  * Restarting with stat
+2024-07-18 17:20:10,994 INFO werkzeug  * Restarting with stat
+2024-07-18 17:24:06,753 INFO werkzeug  * Restarting with stat
+2024-07-18 17:24:50,213 INFO werkzeug  * Restarting with stat
+2024-07-18 17:25:54,762 INFO werkzeug  * Restarting with stat
+2024-07-18 17:30:09,853 INFO werkzeug  * Restarting with stat

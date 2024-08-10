@@ -1,0 +1,199 @@
+{%extends 'template.html'%}
+{% block title %}
+Hasil Pencarian
+{% endblock %}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/results' %}
+                    text-yellow-600
+                    {% else %}
+                    self-center
+                    {% endif %}">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span class="mr-2">Hasil Pencarian</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/all_results' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('all_results') }}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Semua Hasil Pencarian</span>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <content id="content-base" class="space-y-4">
+        <h3 class="tracking-wide font-bold text-2xl">Hasil Pencarian</h3>
+
+        <div class="p-4 text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+            <span class="font-normal">Menampilkan hasil pencarian untuk:
+                {% if queries %}
+                {% for query in queries %}
+                <a class="italic capitalize">'{{ query }}'{% if not loop.last %}, {%
+                    endif %}</a>
+                {% endfor %}
+                {% else %}
+                {% endif %}
+            </span>
+        </div>
+
+
+        <div class="flex flex-row items-center space-x-20 justify-between">
+            <form action="{{ url_for('results') }}" method="POST">
+                <label>Menampilkan
+                    <select type="number" id="per_page" name="per_page" onchange="this.form.submit()"
+                        class="border p-1">
+                        <option value="10" {% if per_page==10 %}selected{% endif %}>10</option>
+                        <option value="25" {% if per_page==25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if per_page==50 %}selected{% endif %}>50</option>
+                        <option value="75" {% if per_page==75 %}selected{% endif %}>75</option>
+                        <option value="100" {% if per_page==100 %}selected{% endif %}>100</option>
+                    </select>
+                    entri
+                </label>
+            </form>
+            <div class="flex flex-row items-center space-x-3">
+                <a href="/results/download/excel">
+                    <button
+                        class="bg-green-600 hover:bg-green-700 text-white focus:ring-4 focus:ring-green-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Excel</span>
+                    </button></a>
+                <a href="/results/preview_pdf" target="_blank">
+                    <button
+                        class="bg-red-600 hover:bg-red-700 text-white focus:ring-4 focus:ring-red-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Pdf</span>
+                    </button></a>
+            </div>
+            <!--
+            <form id="searchForm" class="space-x-4">
+                <label for="search" class="mr-2">Cari :</label>
+                <input type="text" name="search_query" id="search_query" placeholder="Cari data.."
+                    class="border rounded-md border-gray-300 px-2 py-2">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <spa>Cari</spa>
+                </button>
+            </form>
+            -->
+        </div>
+
+
+
+        <div id="content-table" class="overflow-x-auto pb-8">
+            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                <thead class="text-sm text-gray-700 uppercase">
+                    <tr class="text-left border-b-2">
+                        <th scope="col" class="px-3 py-3">No</th>
+                        <th scope="col" class="px-3 py-3 w-1/6">Query</th>
+                        <th scope="col" class="px-3 py-3 w-1/5">Penulis</th>
+                        <th scope="col" class="px-3 py-3">Judul Penelitian</th>
+                        <th scope="col" class="px-3 py-3">Dikutip oleh</th>
+                        <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody" class="text-gray-700">
+                    {% if value %}
+                    {% for row in value %}
+                    <tr class=" border-b">
+                        <td class="px-3 py-2">{{ (page - 1) * per_page + loop.index }}</td>
+                        <td class="px-3 py-2">{{row.query}}</td>
+                        <td class="px-3 py-2">{{row.author}}</td>
+                        <td class="px-3 py-2"><a href="{{row.title_url  }}" target="_blank">{{row.title}}</a></td>
+                        <td class="px-3 py-2"><a href="{{row.cited_by_url}}" target="_blank"">{{row.cited_by_value}}</a></td>
+                        <td class=" px-3 py-2">{{row.publication_year}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#searchForm').on('submit', function (event) {
+                    event.preventDefault();
+
+                    var searchQuery = $('#search_query').val();
+
+                    $.ajax({
+                        url: '/search-data-json',
+                        method: 'POST',
+                        data: { search_query: searchQuery },
+                        success: function (response) {
+                            var dataBody = $('#dataBody');
+                            dataBody.empty();
+
+                            if (response.length > 0) {
+                                response.forEach(function (item, index) {
+                                    var row =
+                                        '<tr class="odd:bg-white even:bg-gray-50 border-b">' +
+                                        '<td class="px-3 py-2">' + (index + 1) + '</td>' +
+                                        '<td class="px-3 py-2">' + item.query + '</td>' +
+                                        '<td class="px-3 py-2">' + item.author + '</td>' +
+                                        '<td class="px-3 py-2"><a href="' + item.title_url + '" target="_blank">' + item.title + '</a></td>' +
+                                        '<td class="px-3 py-2"><a href="' + item.cited_by_url + '" target="_blank">' + item.cited_by_value + '</a></td>' +
+                                        '<td class="px-3 py-2">' + item.publication_year + '</td>' +
+                                        '</tr>';
+                                    dataBody.append(row);
+                                });
+                            } else {
+                                var noDataMessage =
+                                    '<tr><td colspan="6" class="text-center py-4">Tidak ada data yang sesuai</td></tr>';
+                                dataBody.append(noDataMessage);
+                            }
+                        },
+                    });
+                });
+            });
+        </script>
+    </content>
+
+    <pagination class="pagination space-x-2 flex items-center justify-center">
+        {% if page > 1 %}
+        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('results', page=1, per_page=per_page) }}">
+            <i class="text-gray-800 fa-solid fa-angles-left" style="color: rgb(107 114 128);"></i>
+        </a>
+        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('results', page=page-1, per_page=per_page) }}">
+            <i class="text-gray-800 fa-solid fa-angle-left" style="color: rgb(107 114 128);"></i>
+        </a>
+        {% endif %}
+
+        <span>Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %} <a
+            class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('results', page=page+1, per_page=per_page) }}">
+            <i class="text-gray-800 fa-solid fa-angle-right" style="color: rgb(107 114 128);"></i>
+            </a>
+            <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+                href="{{ url_for('results', page=total_pages, per_page=per_page) }}">
+                <i class="text-gray-800 fa-solid fa-angles-right" style="color: rgb(107 114 128);"></i>
+            </a>
+            {% endif %}
+    </pagination>
+
+</div>
+
+{%endblock%}

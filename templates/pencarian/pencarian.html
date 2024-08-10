@@ -1,0 +1,276 @@
+{%extends 'template.html'%}
+{% block title %}
+Pencarian
+{% endblock %}
+{%block content%}
+
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/authors' %}
+                    text-yellow-600
+                    {% else %}
+                    self-center
+                    {% endif %}">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i>
+                        <span class="mr-2">Pencarian</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/authors/history_get_articles' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('history_get_articles') }}">
+                        <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
+                        <span>Riwayat Tarik Data</span>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <content id="content-base" class="space-y-4">
+        <a class="tracking-wide font-bold text-2xl">Pencarian</a>
+        <!--
+        <p class="text-justify">
+            Ini adalah halaman pencarian. Pengguna dapat melakukan pencarian dengan memasukkan query pencarian berupa
+            nama dosen pada form di bawah.
+            Baca selengkapnya <a class="cursor-pointer underline text-blue-700 hover:text-blue-800" id="info-text">di
+                sini</a><i class="fa-solid fa-circle-info ml-1 cursor-pointer" id="info-icon"></i>
+        </p>
+
+        <div id="more-text" class="hidden mt-2 text-gray-800 text-sm text-justify leading-tight bg-gray-100 p-4">
+            <p class="text-justify">Pencarian publikasi ilmiah yang berkaitan dengan Jhon Dee, pengguna dapat
+                menggunakan query berikut:</p>
+            <p class="text-justify bg-gray-50 p-2 max-w-xs text-zinc-500 font-mono">
+                Query: Jhon Dee
+            </p>
+            <p class="text-justify">
+                Crawling dapat dilakukan dengan memasukkan lebih dari satu query dan memisahkannya menggunakan separator
+                koma <a class="bg-gray-50 p-1 font-mono">(,)</a>.
+                Misalnya, untuk mencari publikasi ilmiah yang berkaitan dengan Jhon Dee dan Jhon Paul, pengguna dapat
+                menggunakan query berikut:
+            </p>
+            <p class="text-justify bg-gray-50 p-2 max-w-xs text-zinc-500 font-mono">
+                Query: Jhon Dee; Jhon Paul
+            </p>
+            <p class="text-justify">Form di bawah ini menggunakan fitur <em>autocomplete</em> yang akan menampilkan nama
+                dosen secara langsung sesuai dengan karakter yang diinputkan oleh pengguna.
+                Jika nama dosen tidak muncul, pengguna masih dapat melakukan crawling dengan menginputkan nama dosen
+                secara manual melalui form.
+                Baca tentang ketentuan query pencarian <a href="{{ url_for('index') }}"
+                    class="underline text-blue-700 hover:text-blue-800">di sini.</a>
+            </p>
+        </div>
+        -->
+        <!--More text-->
+        <script>
+            document.getElementById('info-text').addEventListener('click', function () {
+                var moreText = document.getElementById('more-text');
+                moreText.classList.toggle('hidden');
+            });
+
+            document.getElementById('info-icon').addEventListener('click', function () {
+                var moreText = document.getElementById('more-text');
+                moreText.classList.toggle('hidden');
+            });
+        </script>
+        <style>
+            .hidden-column {
+                display: none;
+            }
+        </style>
+
+        <div class="flex gap-8 pt-6">
+            <div class="w-1/3">
+                <h1 class="font-medium">Profil Dosen</h1>
+                <p class="py-2">Masukkan nama dosen untuk mencari profil dan mengambil data publikasi ilmiahnya.</p>
+            </div>
+            <div class="w-2/3">
+                <h1 class="font-medium">Masukkan query</h1>
+                <form action="{{ url_for('get_authors') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-5 relative w-full pt-2">
+                        <input type="text" id="query_profiles" name="query_profiles" autocomplete="off" required
+                            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 transition duration-300"
+                            placeholder="John Dee or John Dee, John Paul">
+                        <div id="search-results"
+                            class="absolute rounded-md bg-white max-h-60 min-w-72 shadow overflow-y-auto"></div>
+                    </div>
+
+                    <div class="flex flex-row flex-row-reverse pb-12">
+                        <button type="submit"
+                            class="max-w-20 min-w-20 text-white text-sm text-center py-2 px-4 ml-2 bg-blue-600 rounded hover:bg-blue-800">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Cari</span>
+                        </button>
+                    </div>
+                </form>
+                <div class="border-b"></div>
+            </div>
+        </div>
+        <div class="flex gap-8 pt-2">
+            <div class="w-1/3">
+                <h1 class="font-medium">Riwayat Pencarian</h1>
+                <p class="py-2">Menampilkan riwayat pencarian profil dosen.</p>
+            </div>
+            <div class="w-2/3">
+                <h1 class="font-medium">Profil Dosen</h1>
+                <form id="crawlingForm" onsubmit="return validateCheckboxes()" action="{{ url_for('get_articles') }}"
+                    method="POST" enctype="multipart/form-data">
+                    {% if profiles %}
+                    <div id="content-table" class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500" id="dataTable">
+                            <thead class="text-sm text-gray-700 uppercase">
+                                <tr class="text-left border-b-2">
+                                    <th class="py-4">
+                                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                                    </th>
+                                    <th scope="col" class="px-2 py-4">No</th>
+                                    <th class="hidden-column" scope="col" class="px-4 py-4">Id</th>
+                                    <th scope="col" class="px-2 py-4">Dosen</th>
+                                    <th scope="col" class="px-2 py-4">Afiliasi</th>
+                                    <th scope="col" class="px-2 py-4">Interes</th>
+                                    <th scope="col" class="px-6 py-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataBody" class="text-gray-700">
+                                {% for author in profiles %}
+                                <tr class="border-b">
+                                    <td class="py-2">
+                                        <input type="checkbox" class="select-item" name="selected_authors"
+                                            value="{{ author.author_id }}">
+                                    </td>
+                                    <td class="px-2 py-2">{{ loop.index }}</td>
+                                    <td class="hidden-column" class="px-4 py-2">{{ author.author_id }}</td>
+                                    <td class="px-2 py-2 flex flex-row">
+                                        <a href="{{ author.thumbnail }}" target="_blank">
+                                            <img src="{{ author.thumbnail }}"
+                                                class="w-12 h-9 object-cover rounded-full">
+                                        </a>
+                                        <a class="ml-4">{{ author.name }}</a>
+                                    </td>
+                                    <td class="px-2 py-2">{{ author.affiliations }}</td>
+                                    <td class="px-2 py-2">
+                                        {{ author.interests | join(', ') }}
+                                    </td>
+                                    <td class="px-6 py-2">
+                                        <a href="{{ url_for('get_articles', selected_author=author.author_id) }}"
+                                            class="text-sm text-center py-2 px-8 rounded border hover:shadow-md">
+                                            Tarik
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="py-4">
+                        <button type="submit" id="crawl-selected"
+                            class="text-white text-sm text-center py-2 px-4 bg-blue-600 rounded hover:bg-blue-800">
+                            Tarik data
+                        </button>
+                    </div>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
+                    </tr>
+                    {% endif %}
+
+                </form>
+            </div>
+        </div>
+
+    </content>
+
+    <!-- Checkbox-->
+    <script>
+        function validateCheckboxes() {
+            const checkboxes = document.querySelectorAll('.select-item');
+            let isChecked = false;
+
+            // Periksa apakah ada checkbox yang diceklis
+            for (let checkbox of checkboxes) {
+                if (checkbox.checked) {
+                    isChecked = true;
+                    break;
+                }
+            }
+
+            // Jika tidak ada checkbox yang diceklis, tampilkan peringatan
+            if (!isChecked) {
+                alert('Silakan ceklis setidaknya satu kotak sebelum melakukan crawling.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('.select-item');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = source.checked;
+            }
+        }
+    </script>
+
+    <!--autovomplete-->
+    <script>
+        $(document).ready(function () {
+            $('#query_profiles').on('input', function () {
+                var query = $(this).val();
+                var lastQuery = query.split(',').pop().trim(); // Ambil query terakhir
+                var queries = query.split(',').map(item => item.trim());
+
+                if (lastQuery.length > 0) {
+                    $.ajax({
+                        url: '{{ url_for("search_query") }}',
+                        method: 'GET',
+                        data: { nama: lastQuery },
+                        success: function (data) {
+                            var results = $('#search-results');
+                            results.empty();
+                            var filteredData = data.filter(function (item) {
+                                return !queries.includes(item);
+                            });
+
+                            if (filteredData.length > 0) {
+                                filteredData.forEach(function (item) {
+                                    results.append('<div class="cursor-pointer hover:bg-gray-200 py-3 px-4">' + item + '</div>');
+                                });
+
+                                // Add click event to select the value from the dropdown
+                                $('#search-results div').on('click', function () {
+                                    var selectedValue = $(this).text();
+                                    if (!queries.includes(selectedValue)) {
+                                        queries.pop(); // Remove last empty query
+                                        queries.push(selectedValue); // Add selected value
+                                        $('#query_profiles').val(queries.join(', '));
+                                        results.empty(); // Clear the dropdown
+                                    }
+                                });
+                            } else {
+                                results.append('<div class="p-2 text-gray-500">Enter manually...</div>');
+                            }
+
+                        }
+                    });
+                } else {
+                    $('#search-results').empty();
+                }
+            });
+        });
+    </script>
+
+</div>
+
+
+
+{%endblock%}

@@ -1,0 +1,112 @@
+{%extends 'template.html'%}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md flex flex-row justify-between" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/admin' %}
+                    text-yellow-600
+                    {% else %}
+                    self-center
+                    {% endif %}">
+                        <i class="fa-solid fa-user mr-2"></i>
+                        <span class="mr-2">Admin</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/dosen' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('dosen') }}">
+                        <i class="fa-solid fa-users ml-2 mr-2"></i>
+                        <span>Dosen</span>
+                    </a>
+                </div>
+            </li>
+        </ol>    
+    </nav>
+
+    <content id="content-base" class="space-y-4">
+        <h2 class="text-xl">Halo, <a class="font-bold capitalize">{{ current_user.username }}</a></h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+            <div class="text-blue-800 text-sm bg-blue-50 border border-blue-500 px-4 py-3 rounded relative mb-2" role="alert">
+                <li class="{{ category }}">{{ message }}</li>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">
+                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <div id="button" class="flex flex-row-reverse justify-between">
+            <div class="flex flex-row-reverse space-x-reverse space-x-4 text-center text-white text-sm">
+                <a href="{{url_for('admin_add')}}" class="py-2 px-4 bg-blue-600 rounded hover:bg-blue-800">
+                    <i class="fa-solid fa-user-plus"></i>
+                </a>
+            </div>
+        </div>
+
+
+        <div id="content-table" class="overflow-x-auto pb-8">
+            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                <thead class="text-sm text-gray-700 uppercase">
+                    <tr class="text-left border-b-2">
+                        <th scope="col" class="px-3 py-3">No</th>
+                        <th scope="col" class="px-3 py-3">Username</th>
+                        <th scope="col" class="px-3 py-3">Password</th>
+                        <th scope="col" class="px-3 py-3">Diperbarui</th>
+                        <th scope="col" class="px-3 py-3">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    {% for row in admin %}
+                    <tr class="border-b">
+                        <td class="px-3 py-2">{{loop.index}}</td>
+                        <td class="px-3 py-2">{{row[1]}}</td>
+                        <td class="px-3 py-2">{{row[2]}}</td>
+                        <td class="px-3 py-2">{{row[4]}}</td>
+                        <td class="flex flex-row space-x-8 py-2">
+                            <div class="flex">
+                                <form action="{{ url_for('admin_update_form', id=row[0]) }}" method="GET">
+                                    <div class="w-5 mr-2 hover:scale-110">
+                                        <button type="submit" class="py-1 px-4"><i type="submit"
+                                                class="fa-solid fa-pen-to-square"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="flex">
+                                <form action="{{ url_for('admin_delete', id=row[0]) }}" method="POST">
+                                    <div class="w-5 mr-2 hover:scale-110">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit"
+                                            class="py-1 px-4 {{ 'hidden' if loop.index == 1 else '' }}"><i type="submit"
+                                                class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </content>
+</div>
+
+{%endblock%}

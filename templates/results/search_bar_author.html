@@ -1,0 +1,175 @@
+{%extends 'template.html'%}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <div class="py-4 flex justify-between space-x-4">
+        <form method="GET" action="{{ url_for('all_results_search_author') }}"
+            class="button flex items-center border border-black-500 text-black-500 rounded-sm py-2.5 px-5 w-32 hover:shadow-md transition duration-500">
+            <input type="hidden" name="query" value="{{ author }}">
+            <svg class="h-5 w-5 mr-3 fill-current" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-49 141 512 512"
+                style="enable-background:new -49 141 512 512;" xml:space="preserve">
+                <path id="XMLID_10_"
+                    d="M438,372H36.355l72.822-72.822c9.763-9.763,9.763-25.592,0-35.355c-9.763-9.764-25.593-9.762-35.355,0 l-115.5,115.5C-46.366,384.01-49,390.369-49,397s2.634,12.989,7.322,17.678l115.5,115.5c9.763,9.762,25.593,9.763,35.355,0 c9.763-9.763,9.763-25.592,0-35.355L36.355,422H438c13.808,0,25-11.193,25-25S451.808,372,438,372z">
+                </path>
+            </svg>
+            <button type="submit">
+                Kembali
+            </button>
+        </form>
+        <form method="GET" action="{{ url_for('search_bar_author') }}" class="max-w-md mx-auto">
+            <label for="search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Cari</label>
+            <input type="hidden" name="author" value="{{ author }}">
+            <input type="search" name="search" id="search" required value="{{ request.args.get('search', '') }}"
+                class="min-w-64 max-w-64 p-3 ps-4 text-sm text-gray-900 border border-gray-300 rounded-lg"
+                placeholder="Cari Penulis, Judul..." required />
+            <button type="submit"
+                class="ml-2 p-3 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span class="sr-only">Search</span>
+            </button>
+        </form>
+    </div>
+    <content id="content-base" class="space-y-4">
+        <p class="tracking-wide font-bold text-2xl">Semua Hasil Pencarian</p>
+
+        <p>Menampilkan hasil Pencarian untuk: <a class="text-slate-500">'{{ search_query }}'</a> dari <a class="text-slate-500">'{{ author }}'</a></p>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sortButton = document.getElementById('sortButton');
+                const sortOptions = document.getElementById('sortOptions');
+
+                sortButton.addEventListener('click', () => {
+                    sortOptions.classList.toggle('hidden');
+                });
+            });
+        </script>
+<!--
+        <div class="flex flex-row space-x-4 justify-between">
+            <button id="sortButton"
+                class="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded-md">
+                <i class="fa-solid fa-sliders"></i>
+                <span>urutkan</span>
+            </button>
+            
+            <div class="flex flex-row items-center space-x-3">
+                <form method="GET" action="{{ url_for('search_author_download_excel') }}">
+                    <input type="hidden" name="query" value="{{ author }}">
+                    <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white focus:ring-4 focus:ring-green-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Excel</span>
+                    </button>
+                </form>
+                <form method="GET" action="{{ url_for('search_author_preview_pdf') }}" target="_blank">
+                    <input type="hidden" name="query" value="{{ author }}">
+                    <button
+                        class="bg-red-600 hover:bg-red-700 text-white focus:ring-4 focus:ring-red-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Pdf</span>
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+        -->
+
+        <div id="sortOptions" class="hidden mt-4 text-sm">
+            <form action="{{ url_for('search_bar_author') }}" method="get"
+                class="flex flex-row space-x-6 text-center items-center">
+                <div class="bg-gray-100 rounded-md px-4 py-3 flex flex-row space-x-4">
+                    <div class="flex space-x-4">
+                        <label class="self-center" for="orderQuery" name="orderQuery" id="orderQuery" value="query" {%
+                            if sort_by_query=='query' %}selected{% endif %}>Query :</label>
+                        <select name="orderQuery" id="orderQuery" class="py-2 px-8">
+                            <option value="asc" {% if sort_order_query=='asc' %}selected{% endif %}>Asc</option>
+                            <option value="desc" {% if sort_order_query=='desc' %}selected{% endif %}>Desc</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-4">
+                        <label class="self-center" for="orderCite" name="orderCite" id="orderCite"
+                            value="cited_by_value" {% if sort_by_cite=='cited_by_value' %}selected{% endif %}>Cited by
+                            :</label>
+                        <select name="orderCite" id="orderCite" class="py-2 px-8">
+                            <option value="asc" {% if sort_order_cite=='asc' %}selected{% endif %}>Asc</option>
+                            <option value="desc" {% if sort_order_cite=='desc' %}selected{% endif %}>Desc</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-12">
+                        <label class="self-center" for="sortYear" name="sortYear" id="sortYear" value="publication_year"
+                            {% if sort_by_year=='publication_year' %}selected{% endif %}>Tahun :</label>
+                        <select name="orderYear" id="orderYear" class="py-2 px-8">
+                            <option value="asc" {% if sort_order_year=='asc' %}selected{% endif %}>Asc</option>
+                            <option value="desc" {% if sort_order_year=='desc' %}selected{% endif %}>Desc</option>
+                        </select>
+                    </div>
+                    <button type="submit" name="apply"
+                        class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2">
+                        Urutkan</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="content-table" class="overflow-x-auto pb-8">
+            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                <thead class="text-sm text-gray-700 uppercase">
+                    <tr class="text-left border-b-2">
+                        <th scope="col" class="px-3 py-3">No</th>
+                        <th scope="col" class="px-3 py-3 w-1/6">Query</th>
+                        <th scope="col" class="px-3 py-3 w-1/5">Penulis</th>
+                        <th scope="col" class="px-3 py-3">Judul Penelitian</th>
+                        <th scope="col" class="px-3 py-3">Disitasi Oleh</th>
+                        <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    {% if search_value %}
+                    {% for row in search_value %}
+                    <tr class="odd:bg-white even:bg-gray-50 border-b">
+                        <td class="px-3 py-2">{{ (page - 1) * per_page + loop.index }}</td>
+                        <td class="px-3 py-2">{{row[1]}}</td>
+                        <td class="px-3 py-2">{{row[2]}}</td>
+                        <td class="px-3 py-2"><a href="{{row[4]}}" target="_blank">{{row[3]|default('-')}}</a></td>
+                        <td class="px-3 py-2"><a href="{{row[7]}}" target="_blank">{{row[5]|default('-')}}</a></td>
+                        <td class="px-3 py-2">{{row[7]}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center pt-4">Data tidak ditemukan</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </content>
+
+    <pagination class="pagination space-x-2 flex items-center justify-center">
+        {% if page > 1 %}
+        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('search_author_results', query=author, page=1) }}">
+            <i class="text-gray-800 fa-solid fa-angles-left" style="color: rgb(107 114 128);"></i>
+        </a>
+        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('search_author_results', query=author, page=page-1) }}">
+            <i class="text-gray-800 fa-solid fa-angle-left" style="color: rgb(107 114 128);"></i>
+        </a>
+        {% endif %}
+
+        <span>Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %} <a
+            class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+            href="{{ url_for('search_author_results', query=author, page=page+1) }}">
+            <i class="text-gray-800 fa-solid fa-angle-right" style="color: rgb(107 114 128);"></i>
+            </a>
+            <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
+                href="{{ url_for('search_author_results', query=author, page=total_pages) }}">
+                <i class="text-gray-800 fa-solid fa-angles-right" style="color: rgb(107 114 128);"></i>
+            </a>
+            {% endif %}
+    </pagination>
+
+
+</div>
+{%endblock%}
