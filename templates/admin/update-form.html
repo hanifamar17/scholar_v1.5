@@ -6,7 +6,7 @@
         <p class="mb-2 font-normal">Perbarui username dan password admin!
         </p>
 
-        <form action="{{ url_for('admin_update', id=admin[0]) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('admin_update', id_admin=admin[0]) }}" method="POST" enctype="multipart/form-data">
             <div class="py-8">
                 <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 px-4 py-2 space-y-1">
                     <label for="username" class="self-center text-gray-600">Username</label>

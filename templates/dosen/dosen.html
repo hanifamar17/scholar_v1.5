@@ -131,14 +131,14 @@
                         <td class="px-3 py-2 capitalize">{{row[2]}}</td>
                         <td class="flex flex-row space-x-8 py-2">
                             <div class="flex">
-                                <form action="{{ url_for('dosen_update_form', id=row[0]) }}" method="GET">
+                                <form action="{{ url_for('dosen_update_form', id_dosen=row[0]) }}" method="GET">
                                     <div class="w-5 mr-2 hover:scale-110">
                                         <button type="submit" class="py-1 px-4"><i type="submit" class="fa-solid fa-pen-to-square"></i></button>
                                     </div>
                                 </form>
                             </div>
                             <div class="flex">
-                                <form action="{{ url_for('dosen_delete', id=row[0]) }}" method="POST">
+                                <form action="{{ url_for('dosen_delete', id_dosen=row[0]) }}" method="POST">
                                     <div class="w-5 mr-2 hover:scale-110">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <button type="submit" class="py-1 px-4"><i type="submit" class="fa-solid fa-trash"></i></button>

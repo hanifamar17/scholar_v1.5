@@ -35,7 +35,7 @@ CORS(app)
 app.config["MYSQL_HOST"] = "127.0.0.1"
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = ""
-app.config["MYSQL_DB"] = "crawlings"
+app.config["MYSQL_DB"] = "publications"
 
 mysql = MySQL(app)
 
@@ -46,18 +46,21 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class User(UserMixin):
-    def __init__(self, id, username, password):
-        self.id = id
+    def __init__(self, id_admin, username, password):
+        self.id_admin = id_admin
         self.username = username
         self.password = password
+    
+    def get_id(self):
+        return str(self.id_admin)
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(id_admin):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM admin WHERE id = %s', (user_id,))
+    cursor.execute('SELECT * FROM admin WHERE id_admin = %s', (id_admin,))
     account = cursor.fetchone()
     if account:
-        return User(account['id'], account['username'], account['password'])
+        return User(account['id_admin'], account['username'], account['password'])
     return None
 
 @app.route('/', methods=['GET', 'POST'])
@@ -72,7 +75,7 @@ def login():
             account = cursor.fetchone()
 
             if account and account['password'] == password:  # Pastikan untuk menggunakan hash password di produksi
-                user = User(account['id'], account['username'], account['password'])
+                user = User(account['id_admin'], account['username'], account['password'])
                 login_user(user)
                 return redirect(url_for('index'))
             else:
@@ -142,34 +145,34 @@ def admin_add_submit():
     flash('Admin berhasil ditambahkan.', 'success')
     return redirect(url_for("admin"))
 
-@app.route("/admin/delete/<int:id>", methods=["POST", "DELETE"])
-def admin_delete(id):
+@app.route("/admin/delete/<int:id_admin>", methods=["POST", "DELETE"])
+def admin_delete(id_admin):
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM admin WHERE id = %s", (id,))
+    cur.execute("DELETE FROM admin WHERE id_admin = %s", (id_admin,))
     mysql.connection.commit()
     cur.close()
 
     flash('Admin berhasil dihapus.', 'success')
     return redirect(url_for("admin"))
 
-@app.route("/admin/update/form/<int:id>", methods=["GET", "POST"])
-def admin_update_form(id):
+@app.route("/admin/update/form/<int:id_admin>", methods=["GET", "POST"])
+def admin_update_form(id_admin):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM admin WHERE id = %s", (id,))
+    cur.execute("SELECT * FROM admin WHERE id_admin = %s", (id_admin,))
     data_admin = cur.fetchone()
     cur.close()
 
     return render_template("admin/update-form.html", admin=data_admin)
 
-@app.route("/admin/update/<int:id>", methods=["POST", "GET"])
-def admin_update(id):
+@app.route("/admin/update/<int:id_admin>", methods=["POST", "GET"])
+def admin_update(id_admin):
     username = request.form["username"]
     password = request.form["password"]
 
     cur = mysql.connection.cursor()
     cur.execute(
-        "UPDATE admin SET username = %s, password = %s WHERE id = %s",
-        (username, password, id),
+        "UPDATE admin SET username = %s, password = %s WHERE id_admin = %s",
+        (username, password, id_admin),
     )
     mysql.connection.commit()
     cur.close()
@@ -435,7 +438,7 @@ def preview_pdf():
     rendered = render_template("template/template_pdf.html", data_json=data_json)
 
     config = pdfkit.configuration(
-        wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+        wkhtmltopdf="E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
     )
 
     options = {
@@ -942,34 +945,34 @@ def dosen_add_submit():
     flash('Dosen berhasil ditambahkan.', 'success')
     return redirect(url_for("dosen"))
 
-@app.route("/dosen/delete/<int:id>", methods=["POST", "DELETE"])
-def dosen_delete(id):
+@app.route("/dosen/delete/<int:id_dosen>", methods=["POST", "DELETE"])
+def dosen_delete(id_dosen):
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM dosen WHERE id = %s", (id,))
+    cur.execute("DELETE FROM dosen WHERE id_dosen = %s", (id_dosen,))
     mysql.connection.commit()
     cur.close()
 
     flash('Dosen berhasil dihapus.', 'success')
     return redirect(url_for("dosen"))
 
-@app.route("/dosen/update/form/<int:id>", methods=["GET", "POST"])
-def dosen_update_form(id):
+@app.route("/dosen/update/form/<int:id_dosen>", methods=["GET", "POST"])
+def dosen_update_form(id_dosen):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM dosen WHERE id = %s", (id,))
+    cur.execute("SELECT * FROM dosen WHERE id_dosen = %s", (id_dosen,))
     dosen = cur.fetchone()
     cur.close()
 
     return render_template("dosen/update-form.html", dosen=dosen)
 
-@app.route("/dosen/update/<int:id>", methods=["POST", "GET"])
-def dosen_update(id):
+@app.route("/dosen/update/<int:id_dosen>", methods=["POST", "GET"])
+def dosen_update(id_dosen):
     nama_dosen = request.form["nama_dosen"]
     prodi = request.form["prodi"]
 
     cur = mysql.connection.cursor()
     cur.execute(
-        "UPDATE dosen SET nama_dosen = %s, prodi = %s WHERE id = %s",
-        (nama_dosen, prodi, id),
+        "UPDATE dosen SET nama_dosen = %s, prodi = %s WHERE id_dosen = %s",
+        (nama_dosen, prodi, id_dosen),
     )
     mysql.connection.commit()
     cur.close()
