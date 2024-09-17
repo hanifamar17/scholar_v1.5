@@ -6,8 +6,8 @@ from urllib.parse import urlencode
 
 class ProfilesSpider(CrawlSpider):
     name = "dataCrawler_4"
-    api_key = "4b387964df59b8dbbbc23acd0798bde5e774217ad903179082a931ecd5a5f92e"
-    #api_key = "fdNqwpIHSbCdDq9wdBMcbhOyaDkTRfVq"
+    #api_key = "4b387964df59b8dbbbc23acd0798bde5e774217ad903179082a931ecd5a5f92e" #serpapi.com
+    api_key = "fdNqwpIHSbCdDq9wdBMcbhOyaDkTRfVq" #webscrapingapi.com
     base_url = "https://serpapi.webscrapingapi.com/v1"
     engine = "google_scholar_profiles"
 
@@ -34,8 +34,8 @@ class ProfilesSpider(CrawlSpider):
         queries = query_keyword.split(',')
         
         for query in queries:
-            url = f'https://serpapi.com/search.json?{urlencode({"engine": "google_scholar_profiles", "mauthors": query.strip() +" "+ query_institusi, "api_key": self.api_key})}'
-            #url = f"{self.base_url}?api_key={self.api_key}&engine={self.engine}&mauthors={query.strip()} {query_institusi}"
+            #url = f'https://serpapi.com/search.json?{urlencode({"engine": "google_scholar_profiles", "mauthors": query.strip() +" "+ query_institusi, "api_key": self.api_key})}'
+            url = f"https://serpapi.webscrapingapi.com/v1?api_key={self.api_key}&engine={self.engine}&mauthors={query.strip() +" "+ query_institusi}"
             yield scrapy.Request(url, callback=self.parse_profiles, meta={'query': query.strip()})
             
     def parse_profiles(self, response):

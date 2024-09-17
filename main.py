@@ -15,9 +15,11 @@ import mysql.connector
 import MySQLdb
 from flask_cors import CORS
 import subprocess
+import datetime
 import json
 import pandas as pd
 import io
+import os
 import math
 
 from openpyxl import load_workbook
@@ -36,10 +38,41 @@ app.config["MYSQL_HOST"] = "127.0.0.1"
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "publications"
+BACKUP_PATH = 'C:\\Users\\WINDOWS\\Downloads\\backups'
 
 mysql = MySQL(app)
 
+#BACKUP DATA
+@app.route('/backup', methods=['GET'])
+def backup():
+    try:
+        # Pastikan direktori backup ada
+        if not os.path.exists(BACKUP_PATH):
+            os.makedirs(BACKUP_PATH)
 
+        # Buat nama file backup berdasarkan tanggal dan waktu
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_filename = f"{app.config['MYSQL_DB']}_backup_{timestamp}.sql"
+        backup_filepath = os.path.join(BACKUP_PATH, backup_filename)
+
+        # Command untuk melakukan backup menggunakan mysqldump
+        dump_command = (
+            f"mysqldump -h {app.config['MYSQL_HOST']} "
+            f"-u {app.config['MYSQL_USER']} "
+            f"-p{app.config['MYSQL_PASSWORD']} "
+            f"{app.config['MYSQL_DB']} > {backup_filepath}"
+        )
+
+        # Eksekusi command
+        subprocess.run(dump_command, shell=True, check=True)
+
+        # Mengirim file .sql kepada user untuk di-download
+        return send_file(backup_filepath, as_attachment=True)
+
+    except subprocess.CalledProcessError as e:
+        flash(f"Backup failed: {e}", 'danger')
+        return redirect(url_for('index'))
+    
 #LOGIN
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -212,7 +245,7 @@ def get_articles():
         spider_name = "dataCrawler_3"
         subprocess.run(["scrapy", "crawl", spider_name, "-o", "output.json", "-a", f"author_id={selected_query}",])
 
-        with open("output.json") as items_file:
+        with open("output.json", encoding='utf-8') as items_file:
             data_articles = json.load(items_file)
 
         with open("output_profiles.json") as profiles:
@@ -228,7 +261,7 @@ def get_articles():
         spider_name = "dataCrawler_3"
         subprocess.run(["scrapy", "crawl", spider_name, "-o", "output.json", "-a", f"author_id={selected_query}",])
 
-        with open("output.json") as items_file:
+        with open("output.json", encoding='utf-8') as items_file:
             data_articles = json.load(items_file)
 
         with open("output_profiles.json") as profiles:
@@ -326,7 +359,7 @@ def results():
     else:
         per_page = int(request.args.get("per_page", "10"))
 
-    with open("output.json", "r") as f:
+    with open("output.json", encoding='utf-8') as f:
         data = json.load(f)
 
      # Ganti nilai None dengan 0

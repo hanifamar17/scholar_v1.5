@@ -77,14 +77,6 @@ class ScholarSpider(CrawlSpider):
                 }
                 yield item
         
-        #if 'serpapi_pagination' in data:
-         #   next_page = data['serpapi_pagination'].get('next')
-          #  if next_page:
-           #     yield scrapy.Request(next_page, callback=self.parse_author)
-    
-   # rules = (
-    #    Rule(LinkExtractor(allow=('/citations\?user=\w+&hl=en&oi=ao',)), callback='parse_profile'),
-    #)
- 
+       
   
     

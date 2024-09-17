@@ -1,3 +1,10 @@
 Flask
+flask-mysqldb
+flask-cors
+flask_login
+scrapy
 pandas
 openpyxl
+mysql-connector-python
+itemadapter
+pdfkit

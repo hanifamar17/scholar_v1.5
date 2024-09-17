@@ -6,7 +6,8 @@ from urllib.parse import urlencode
 
 class ScholarSpider(CrawlSpider):
     name = "dataCrawler_3"
-    api_key = "264149b9f24331932b46064ea1c49d13703be61e3db66273505fb177b18e83c7"
+    api_key = "87b5302ce03c812fd3d89bac844ff677700032c0d180c60e65555d0dddae8023" #serpapi.com
+    #api_key = "UyAggJacwk2HMABbPo2OEwAEHaicdnWV" #webscrapingapi.com
     found_titles = set()
 
     custom_settings = {
@@ -30,8 +31,8 @@ class ScholarSpider(CrawlSpider):
         authors = author_id.split(',')
         
         for author_id in authors:
-            #url = f'https://serpapi.com/search.json?author_id={author_id}&engine=google_scholar_author&hl=en&num=100&api_key={self.api_key}'
-            url = f'https://serpapi.com/search.json?author_id={author_id}&engine=google_scholar_author&hl=en&api_key={self.api_key}'
+            url = f'https://serpapi.com/search.json?author_id={author_id}&engine=google_scholar_author&hl=en&api_key={self.api_key}&num=100' 
+            #url = f'https://serpapi.webscrapingapi.com/v1?engine=google_scholar_author&api_key={self.api_key}&author_id={author_id}' 
             yield scrapy.Request(url, callback=self.parse, meta={'author_id': author_id.strip()})
     
     def parse(self, response):

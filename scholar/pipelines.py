@@ -79,7 +79,7 @@ class MysqlPipeline:
             host = 'localhost',
             user = 'root',
             password = '',
-            database = 'crawlings'
+            database = 'publications'
         )
 
         ## Create cursor, used to execute commands
@@ -125,7 +125,7 @@ class MysqlDosenPipeline:
             host = 'localhost',
             user = 'root',
             password = '',
-            database = 'crawlings'
+            database = 'publications'
         )
 
         ## Create cursor, used to execute commands
