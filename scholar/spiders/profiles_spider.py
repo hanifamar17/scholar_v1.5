@@ -2,12 +2,15 @@ import scrapy
 import json
 from scrapy.spiders import CrawlSpider
 from urllib.parse import urlencode
+import os
+from dotenv import load_dotenv
 
 
 class ProfilesSpider(CrawlSpider):
     name = "dataCrawler_4"
-    #api_key = "4b387964df59b8dbbbc23acd0798bde5e774217ad903179082a931ecd5a5f92e" #serpapi.com
-    api_key = "fdNqwpIHSbCdDq9wdBMcbhOyaDkTRfVq" #webscrapingapi.com
+    
+    load_dotenv()
+    api_key = os.getenv('API_KEY_PROFILES') #webscrapingapi.com
     base_url = "https://serpapi.webscrapingapi.com/v1"
     engine = "google_scholar_profiles"
 
