@@ -2,11 +2,14 @@ import scrapy
 import json
 from scrapy.spiders import CrawlSpider
 from urllib.parse import urlencode
-
+import os
+from dotenv import load_dotenv
 
 class ScholarSpider(CrawlSpider):
     name = ""
-    api_key = "264149b9f24331932b46064ea1c49d13703be61e3db66273505fb177b18e83c7"
+    
+    load_dotenv()  # Memuat variabel dari file .env
+    api_key = os.getenv('API_KEY_ARTICLES') #serpapi.com
     found_titles = set()
 
     custom_settings = {
