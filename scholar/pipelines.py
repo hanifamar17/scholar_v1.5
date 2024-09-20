@@ -64,6 +64,7 @@ class ScholarCrawlingPipeline:
         "cited_by_value": item['cited_by_value'],
         "cited_by_url": item['cited_by_url'],
         "publication_year": item['publication_year'],
+        "publication": item['publication'],
         "thumbnail": item['thumbnail']
         }
 

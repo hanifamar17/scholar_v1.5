@@ -33,6 +33,20 @@ Semua Hasil Pencarian
                     </a>
                 </div>
             </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/results/false-articles/view' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('false_articles_view') }}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Publikasi yang Dikecualikan</span>
+                    </a>
+                </div>
+            </li>
         </ol>
         <form method="GET" action="{{ url_for('search_bar') }}" class="max-w-md mx-auto">
             <label for="search" class="text-sm font-medium text-gray-900 sr-only">Cari</label>

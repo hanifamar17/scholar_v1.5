@@ -6,13 +6,13 @@ REM Start all Laragon services
 start laragon.exe
 
 REM Navigate to the scholar_crawler directory
-cd App-Development\scholar_v1.5
+cd /d "E:\App-Development\scholar_v1.5"
 
 REM Run the main.py script using Python
-start "" "python" "main.py"
+start "" "python" "E:\App-Development\scholar_v1.5\main.py"
 
 REM Wait for main.py (adjust the timeout if necessary)
-timeout /t 4
+timeout /t 10
 
 REM Open the browser to http://127.0.0.1:4040
 start "" "http://127.0.0.1:4040"

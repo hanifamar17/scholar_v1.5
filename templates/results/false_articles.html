@@ -1,0 +1,111 @@
+{%extends 'template.html'%}
+{% block title %}
+Hasil Pencarian
+{% endblock %}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/results' %}
+                    text-yellow-600
+                    {% else %}
+                    self-center
+                    {% endif %}" href="{{ url_for('results') }}">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span class="mr-2">Hasil Pencarian</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/all_results' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('all_results') }}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Semua Hasil Pencarian</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/results/false-articles/view' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Publikasi yang Dikecualikan</span>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <content id="content-base" class="space-y-4">
+        <h3 class="tracking-wide font-bold text-2xl">Penelitian yang Dikecualikan</h3>
+
+        <div id="content-table" class="overflow-x-auto pb-8">
+            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                <thead class="text-sm text-gray-700 uppercase">
+                    <tr class="text-left border-b-2">
+                        <th scope="col" class="px-3 py-3">No</th>
+                        <th scope="col" class="px-3 py-3 w-1/8">Query</th>
+                        <th scope="col" class="px-3 py-3 w-1/8">Penulis</th>
+                        <th scope="col" class="px-3 py-3">Judul Penelitian</th>
+                        <th scope="col" class="px-3 py-3">Dikutip oleh</th>
+                        <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
+                        <th scope="col" class="px-3 py-3 w-1/5">Publikasi</th>
+                        <th scope="col" class="px-3 py-3">Hapus</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody" class="text-gray-700">
+                    {% if articles %}
+                    {% for row in articles %}
+                    <tr class=" border-b">
+                        <td class="px-3 py-2">{{ loop.index }}</td>
+                        <td class="px-3 py-2">{{row[0]}}</td>
+                        <td class="px-3 py-2">{{row[1]}}</td>
+                        <td class="px-3 py-2"><a href="{{row[3]  }}" target="_blank">{{row[2]}}</a></td>
+                        <td class="px-3 py-2"><a href="{{row[5]}}" target="_blank"">{{row[4]}}</a></td>
+                        <td class=" px-3 py-2">{{row[6]}}</td>
+                        <td class=" px-3 py-2">{{row[7]}}</td>
+                        <td class="flex flex-row space-x-8 py-2">
+                            <form action="" method="GET">
+                                <div class="hover:scale-110">
+                                    <button type="submit" class="px-3 py-2">
+                                        <i type="submit" class="fa-solid fa-ban"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+
+    </content>
+
+
+</div>
+
+{%endblock%}

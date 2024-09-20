@@ -121,10 +121,8 @@ def login():
 @app.route("/testing", methods=["GET", "POST"])
 def testing():
     if request.method == "POST":
-        selected_query = request.form.getlist("selected_authors")
-        selected = ", ".join(selected_query)
-
-        selected = request.args.get("selected_author")
+        selected_articles = request.form.getlist("selected_articles")
+        selected = ", ".join(selected_articles)
 
         # Format string pengembalian untuk debug
         return f"Received author_id: {selected}"
@@ -394,6 +392,98 @@ def results():
         per_page=per_page,
         total_pages=total_pages,
     )
+
+@app.route("/results/false-articles", methods=["GET", "POST"])
+def false_articles():
+    if request.method == "POST":
+        selected_articles = request.form.getlist("selected_articles")
+        #selected = ", ".join(selected_articles)
+
+        with open("output.json", encoding='utf-8') as file:
+            articles = json.load(file)
+        
+        # Filter data berdasarkan judul yang dipilih
+        false_articles = [article for article in articles if article['title'] in selected_articles]
+
+        #store into false database
+        for article in false_articles:
+            cur = mysql.connection.cursor()
+
+            cur.execute("SELECT * FROM false_articles where title = %s", (article['title'],))
+            result = cur.fetchone()
+
+            if result:
+                print("Item already in database: %s" % (article['title'],))
+            else:
+                cur.execute(
+                    """INSERT INTO false_articles (query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (article['query'],
+                     article['author'],
+                     article['title'],
+                     article['title_url'],
+                     article['cited_by_value'],
+                     article['cited_by_url'],
+                     article['publication_year'],
+                     article['publication']
+                     )
+                )
+                mysql.connection.commit()
+                cur.close()
+
+                # Hapus data yang sudah tersimpan dari output.json
+                remaining_articles = [article for article in articles if article['title'] not in selected_articles]
+        
+                # Tulis ulang sisa artikel yang belum tersimpan ke dalam output.json
+                with open("output.json", "w") as file:
+                    json.dump(remaining_articles, file, indent=4)
+
+        # Format string pengembalian untuk debug
+        #return f"Received selected_articles: {false_articles}"
+        return redirect(url_for('false_articles_view'))
+    
+@app.route("/results/false-articles/view")
+def false_articles_view():
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication FROM false_articles""")
+    false_articles = cur.fetchall()
+    cur.close()
+
+    return render_template("results/false_articles.html", articles=false_articles)
+
+#@app.route("/results/false-articles/delete", methods=["GET", "POST"])
+#def false_articles_delete():
+
+@app.route("/results/filtered-articles", methods=["GET", "POST"])
+def filtered_articles():
+    with open("output.json", encoding='utf-8') as file:
+        articles = json.load(file)
+    
+    filtered_articles = [article for article in articles]
+    for article in filtered_articles:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM publikasi where title = %s", (article['title'],))
+        result = cur.fetchone()
+
+        if result:
+            print("Item already in database: %s" % (article['title'],))
+        else:
+            cur.execute(
+                """INSERT INTO publikasi (query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (article['query'],
+                article['author'],
+                article['title'],
+                article['title_url'],
+                article['cited_by_value'],
+                article['cited_by_url'],
+                article['publication_year'],
+                article['publication'],
+                article['thumbnail'],
+                )
+            )
+            mysql.connection.commit()
+            cur.close()
+    return redirect(url_for('all_results'))
+    
 
 
 @app.route("/all_results", methods=["GET", "POST"])

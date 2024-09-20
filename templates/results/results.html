@@ -33,6 +33,20 @@ Hasil Pencarian
                     </a>
                 </div>
             </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/results/false-articles/view' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('false_articles_view') }}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Publikasi yang Dikecualikan</span>
+                    </a>
+                </div>
+            </li>
         </ol>
     </nav>
     <content id="content-base" class="space-y-4">
@@ -93,40 +107,131 @@ Hasil Pencarian
             -->
         </div>
 
+        <form id="crawlingForm" onsubmit="return validateCheckboxes()" action="{{ url_for('false_articles') }}"
+            method="POST" enctype="multipart/form-data">
+            <div id="content-table" class="overflow-x-auto pb-8">
+                <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+                    <thead class="text-sm text-gray-700 uppercase">
+                        <tr class="text-left border-b-2">
+                            <th class="py-4">
+                                <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                            </th>
+                            <th scope="col" class="px-3 py-3">No</th>
+                            <th scope="col" class="px-3 py-3 w-1/8">Query</th>
+                            <th scope="col" class="px-3 py-3 w-1/8">Penulis</th>
+                            <th scope="col" class="px-3 py-3">Judul Penelitian</th>
+                            <th scope="col" class="px-3 py-3">Dikutip oleh</th>
+                            <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
+                            <th scope="col" class="px-3 py-3 w-1/5">Publikasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody" class="text-gray-700">
+                        {% if value %}
+                        {% for row in value %}
+                        <tr class=" border-b">
+                            <td class="py-2">
+                                <input type="checkbox" class="select-item" name="selected_articles"
+                                    value="{{ row.title }}">
+                            </td>
+                            <td class="px-3 py-2">{{ (page - 1) * per_page + loop.index }}</td>
+                            <td class="px-3 py-2">{{row.query}}</td>
+                            <td class="px-3 py-2">{{row.author}}</td>
+                            <td class="px-3 py-2"><a href="{{row.title_url  }}" target="_blank">{{row.title}}</a></td>
+                            <td class="px-3 py-2"><a href="{{row.cited_by_url}}" target="_blank"">{{row.cited_by_value}}</a></td>
+                            <td class=" px-3 py-2">{{row.publication_year}}</td>
+                            <td class=" px-3 py-2">{{row.publication}}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="py-2">
+                <button type="submit" id="crawl-selected"
+                    class="text-white text-sm text-center py-2 px-4 bg-red-600 rounded hover:bg-red-800">
+                    Kecualikan
+                </button>
+            </div>
+        </form>
+        <form id="save-form" action="{{ url_for('filtered_articles') }}" method="POST" enctype="multipart/form-data">
+            <div>
+                <button type="submit" id="submitBtn"
+                    class="text-white text-sm text-center py-2 px-4 bg-blue-600 rounded hover:bg-blue-800">
+                    Simpan ke Database
+                </button>
+            </div>
+        </form>
+
+        <!-- CDN SweetAlert -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- SweetAlert delete form/crawl-selected -->
+        <script>
+            document.getElementById("crawl-selected").addEventListener("click", function (event) {
+                // Mencegah form dikirim langsung
+                event.preventDefault();
+
+                // SweetAlert untuk konfirmasi
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika konfirmasi "Yes", form dikirim ke server Flask
+                        document.getElementById("crawlingForm").submit();
+
+                        // SweetAlert setelah berhasil
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Your data has been deleted.",
+                            icon: "success"
+                        });
+                    }
+                });
+            });
+        </script>
+
+        <!-- SweetAlert save form -->
+        <script>
+            document.getElementById("submitBtn").addEventListener("click", function (event) {
+                // Mencegah form dikirim langsung
+                event.preventDefault();
+
+                // SweetAlert untuk konfirmasi
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, save it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika konfirmasi "Yes", form dikirim ke server Flask
+                        document.getElementById("save-form").submit();
+
+                        // SweetAlert setelah berhasil
+                        Swal.fire({
+                            title: "Saved!",
+                            text: "Your data has been saved.",
+                            icon: "success"
+                        });
+                    }
+                });
+            });
+        </script>
 
 
-        <div id="content-table" class="overflow-x-auto pb-8">
-            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
-                <thead class="text-sm text-gray-700 uppercase">
-                    <tr class="text-left border-b-2">
-                        <th scope="col" class="px-3 py-3">No</th>
-                        <th scope="col" class="px-3 py-3 w-1/6">Query</th>
-                        <th scope="col" class="px-3 py-3 w-1/5">Penulis</th>
-                        <th scope="col" class="px-3 py-3">Judul Penelitian</th>
-                        <th scope="col" class="px-3 py-3">Dikutip oleh</th>
-                        <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
-                    </tr>
-                </thead>
-                <tbody id="dataBody" class="text-gray-700">
-                    {% if value %}
-                    {% for row in value %}
-                    <tr class=" border-b">
-                        <td class="px-3 py-2">{{ (page - 1) * per_page + loop.index }}</td>
-                        <td class="px-3 py-2">{{row.query}}</td>
-                        <td class="px-3 py-2">{{row.author}}</td>
-                        <td class="px-3 py-2"><a href="{{row.title_url  }}" target="_blank">{{row.title}}</a></td>
-                        <td class="px-3 py-2"><a href="{{row.cited_by_url}}" target="_blank"">{{row.cited_by_value}}</a></td>
-                        <td class=" px-3 py-2">{{row.publication_year}}</td>
-                    </tr>
-                    {% endfor %}
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
             $(document).ready(function () {
@@ -166,6 +271,38 @@ Hasil Pencarian
                 });
             });
         </script>
+
+        <!-- Checkbox-->
+        <script>
+            function validateCheckboxes() {
+                const checkboxes = document.querySelectorAll('.select-item');
+                let isChecked = false;
+
+                // Periksa apakah ada checkbox yang diceklis
+                for (let checkbox of checkboxes) {
+                    if (checkbox.checked) {
+                        isChecked = true;
+                        break;
+                    }
+                }
+
+                // Jika tidak ada checkbox yang diceklis, tampilkan peringatan
+                if (!isChecked) {
+                    alert('Silakan ceklis setidaknya satu kotak sebelum melakukan crawling.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function toggleSelectAll(source) {
+                const checkboxes = document.querySelectorAll('.select-item');
+                for (let checkbox of checkboxes) {
+                    checkbox.checked = source.checked;
+                }
+            }
+        </script>
+
     </content>
 
     <pagination class="pagination space-x-2 flex items-center justify-center">
