@@ -76,7 +76,7 @@ def backup():
 #ERROR HANDLING GLOBAL
 @app.errorhandler(MySQLdb.OperationalError)
 def handle_db_connection_error(e):
-    error_msg = "Terjadi masalah saat mengakses sistem. Pastikan Database server anda sudah dijalankan."
+    error_msg = "Oops! It looks like there's a problem with the server. Please check if the database server is running properly."
     return render_template("error.html", error=error_msg), 500
 
 @app.errorhandler(404)
