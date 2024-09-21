@@ -73,6 +73,21 @@ def backup():
         flash(f"Backup failed: {e}", 'danger')
         return redirect(url_for('index'))
     
+#ERROR HANDLING GLOBAL
+@app.errorhandler(MySQLdb.OperationalError)
+def handle_db_connection_error(e):
+    error_msg = "Terjadi masalah saat mengakses sistem. Pastikan Database server anda sudah dijalankan."
+    return render_template("error.html", error=error_msg), 500
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    error_msg = "Terjadi kesalahan internal pada server."
+    return render_template("error.html", error=error_msg), 500
+ 
 #LOGIN
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -89,12 +104,16 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(id_admin):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM admin WHERE id_admin = %s', (id_admin,))
-    account = cursor.fetchone()
-    if account:
-        return User(account['id_admin'], account['username'], account['password'])
-    return None
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM admin WHERE id_admin = %s', (id_admin,))
+        account = cursor.fetchone()
+        if account:
+            return User(account['id_admin'], account['username'], account['password'])
+        return None
+    except MySQLdb.OperationalError as e:
+        app.logger.error(f"Database connection failed: {e}")
+        return None
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -115,7 +134,7 @@ def login():
                 flash('Invalid username or password', 'danger')
         return render_template('login.html')
     except MySQLdb.OperationalError as e:
-        error_msg = "Terjadi masalah saat mengakses database. Pastikan Database server anda sudah dijalankan."
+        error_msg = "Terjadi masalah saat mengakses sistem. Pastikan Database server anda sudah dijalankan."
         return render_template("error-login.html", error=error_msg)
 
 @app.route("/testing", methods=["GET", "POST"])
@@ -127,12 +146,11 @@ def testing():
         # Format string pengembalian untuk debug
         return f"Received author_id: {selected}"
 
-
 @app.route("/dashboard")
 @login_required
 def index():
     return render_template("index.html")
-
+    
 @app.route('/logout')
 @login_required
 def logout():
@@ -142,20 +160,14 @@ def logout():
 #ADMIN
 @app.route("/admin")
 def admin():
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("""SELECT * FROM admin""")
-        data_admin = cur.fetchall()
-        cur.close()
-
-        return render_template(
-            "admin/admin.html",
-            admin=data_admin
-        )
-
-    except MySQLdb.OperationalError as e:
-        error_msg = "Terjadi masalah saat mengakses database. Pastikan Database server anda sudah dijalankan."
-        return render_template("error.html", error=error_msg)
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT * FROM admin""")
+    data_admin = cur.fetchall()
+    cur.close()
+    return render_template(
+        "admin/admin.html",
+        admin=data_admin
+    )
 
 @app.route("/admin/add", methods=["GET", "POST"])
 def admin_add():
@@ -216,7 +228,6 @@ def admin_update(id_admin):
 def authors():
     with open("output_profiles.json", "r") as profiles:
         data_profiles_json = json.load(profiles)
-
     return render_template("pencarian/pencarian.html", profiles=data_profiles_json)
     
 @app.route("/authors/get_authors", methods=["GET", "POST"])
@@ -278,7 +289,6 @@ def get_profiles():
     #query_profiles = session.get("query_profiles", "-")
     data_profiles = session.get("data_profiles", "-")
     not_found_queries = []
-    
 
     try:
         with open("output_profiles.json") as profiles:
@@ -301,50 +311,54 @@ def get_profiles():
     
 @app.route("/authors/history_get_articles")
 def history_get_articles():
-    try:
-        cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor()
+    cur.execute(
+        "SELECT query, GROUP_CONCAT(thumbnail) AS thumbnail, MAX(updated_at) AS updated_at "
+        "FROM publikasi "
+        "GROUP BY query "
+        "ORDER BY updated_at DESC"
+    )
+    authors = cur.fetchall()
+    author_data = []
+    for author in authors:
+        query = author[0].lower()
+        thumbnail = author[1]
+        updated_at = author[2]
+        updated_at = updated_at.strftime("%d-%m-%Y %H:%M:%S")
         cur.execute(
-            "SELECT query, GROUP_CONCAT(thumbnail) AS thumbnail, MAX(updated_at) AS updated_at "
-            "FROM publikasi "
-            "GROUP BY query "
-            "ORDER BY updated_at DESC"
+            "SELECT prodi FROM dosen WHERE LOWER(nama_dosen) = %s", (query,)
         )
-        authors = cur.fetchall()
+        result = cur.fetchone()
+        if result:
+            prodi = result[0]
+        else:
+            prodi = "-"
+        author_data.append(
+            {
+                "query": query,
+                "thumbnail": thumbnail,
+                "prodi": prodi,
+                "updated_at": updated_at,
+            }
+        )
+    cur.close()
+    return render_template("pencarian/history_get_articles.html", history=author_data)
+    
 
-        author_data = []
-        for author in authors:
-            query = author[0].lower()
-            thumbnail = author[1]
-            updated_at = author[2]
-
-            updated_at = updated_at.strftime("%d-%m-%Y %H:%M:%S")
-
-            cur.execute(
-                "SELECT prodi FROM dosen WHERE LOWER(nama_dosen) = %s", (query,)
-            )
-            result = cur.fetchone()
-
-            if result:
-                prodi = result[0]
-            else:
-                prodi = "-"
-
-            author_data.append(
-                {
-                    "query": query,
-                    "thumbnail": thumbnail,
-                    "prodi": prodi,
-                    "updated_at": updated_at,
-                }
-            )
-
-        cur.close()
-        return render_template("pencarian/history_get_articles.html", history=author_data)
-
-    except MySQLdb.OperationalError as e:
-        error_msg = "Terjadi masalah saat mengakses database. Pastikan Database server anda sudah dijalankan."
-        return render_template("error.html", error=error_msg)
-
+@app.route("/authors/history_profiles")
+def history_profiles():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT name, affiliations, thumbnail, author_id, interests FROM profiles ORDER BY updated_at DESC")
+    history_profiles = cur.fetchall()
+    converted_profiles = []
+    for profile in history_profiles:
+        name, affiliations, thumbnail, author_id, interests = profile
+        # Jika 'interests' adalah string JSON, konversi ke list Python
+        if isinstance(interests, str):
+            interests = json.loads(interests)  # Mengubah string JSON jadi list
+        converted_profiles.append((name, affiliations, thumbnail, author_id, interests))
+    cur.close()
+    return render_template("pencarian/history_profiles.html", history_profiles=converted_profiles)
 
 #HASIL PENCARIAN
 @app.route("/results", methods=["GET", "POST"])
@@ -357,7 +371,7 @@ def results():
     else:
         per_page = int(request.args.get("per_page", "10"))
 
-    with open("output.json", encoding='utf-8') as f:
+    with open("output.json", 'r', encoding='utf-8') as f:
         data = json.load(f)
 
      # Ganti nilai None dengan 0
@@ -416,7 +430,7 @@ def false_articles():
                 print("Item already in database: %s" % (article['title'],))
             else:
                 cur.execute(
-                    """INSERT INTO false_articles (query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                    """INSERT INTO false_articles (query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (article['query'],
                      article['author'],
                      article['title'],
@@ -424,7 +438,8 @@ def false_articles():
                      article['cited_by_value'],
                      article['cited_by_url'],
                      article['publication_year'],
-                     article['publication']
+                     article['publication'],
+                     article['thumbnail']
                      )
                 )
                 mysql.connection.commit()
@@ -435,23 +450,57 @@ def false_articles():
         
                 # Tulis ulang sisa artikel yang belum tersimpan ke dalam output.json
                 with open("output.json", "w") as file:
-                    json.dump(remaining_articles, file, indent=4)
+                    json.dump(remaining_articles, file, indent=2)
 
         # Format string pengembalian untuk debug
         #return f"Received selected_articles: {false_articles}"
-        return redirect(url_for('false_articles_view'))
+        return redirect(url_for('results'))
     
 @app.route("/results/false-articles/view")
 def false_articles_view():
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication FROM false_articles""")
+    cur.execute("""SELECT id_false_articles, query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail FROM false_articles""")
     false_articles = cur.fetchall()
     cur.close()
 
     return render_template("results/false_articles.html", articles=false_articles)
 
-#@app.route("/results/false-articles/delete", methods=["GET", "POST"])
-#def false_articles_delete():
+@app.route("/results/false-articles/delete/<int:id_false_articles>", methods=["GET", "POST"])
+def false_articles_delete(id_false_articles):
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail 
+                FROM false_articles WHERE id_false_articles=  %s""", (id_false_articles,))
+    false_articles = cur.fetchone()
+
+    # Baca output.json saat ini
+    with open('output.json', encoding='utf-8') as file:
+        output_data = json.load(file)
+        
+    # Tambahkan data false_articles ke output.json
+    publication = {
+        'query': false_articles[0],
+        'author': false_articles[1],
+        'title': false_articles[2],
+        'title_url': false_articles[3],
+        'cited_by_value': false_articles[4],
+        'cited_by_url': false_articles[5],
+        'publication_year': false_articles[6],
+        'publication': false_articles[7],
+        'thumbnail': false_articles[8]
+    }
+    output_data.append(publication)
+
+    # Tulis ulang data ke output.json
+    with open('output.json', 'w', encoding='utf-8') as file:
+        json.dump(output_data, file, indent=2)
+
+    cur.execute("DELETE FROM false_articles WHERE id_false_articles = %s", (id_false_articles,))
+
+    mysql.connection.commit()
+    cur.close()
+
+    flash('Publikasi berhasil dihapus dari list.', 'success')
+    return redirect(url_for("false_articles_view"))
 
 @app.route("/results/filtered-articles", methods=["GET", "POST"])
 def filtered_articles():
@@ -488,62 +537,49 @@ def filtered_articles():
 
 @app.route("/all_results", methods=["GET", "POST"])
 def all_results():
-    try:
-        page = request.args.get("page", default=1, type=int)
-
-        if request.method == "POST":
-            per_page = int(request.form.get("per_page", "10"))
-            return redirect(url_for('all_results', per_page=per_page, page=1))
-        else:
-            per_page = int(request.args.get("per_page", "10"))
-        offset = (page - 1) * per_page
-
-        sort_by_query = request.args.get("sortQuery", default="query", type=str)
-        sort_order_query = request.args.get("orderQuery", default="asc", type=str)
-
-        sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
-        sort_order_year = request.args.get("orderYear", default="asc", type=str)
-
-        # Buat klausa ORDER BY untuk pengurutan
-        order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
-
-        # Query data dari database dengan filter dan paginasi
-        query = (
-            f"SELECT * FROM publikasi {order_clause} LIMIT {per_page} OFFSET {offset}"
-        )
-
-        cur = mysql.connection.cursor()
-        cur.execute(query)
-        # cur.execute('''SELECT author, title, publication_year, link FROM crawlings''')
-        data = cur.fetchall()
-
-        # mengganti nilai None dengan '0'
-        data = [[0 if value is None else value for value in row] for row in data]
-        
-        # Hitung total data untuk paginasi
-        total_data_query = f"SELECT COUNT(*) FROM publikasi"
-        cur.execute(total_data_query)
-        total_data = cur.fetchone()[0]
-
-
-        # hitung total halaman
-        total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
-        cur.close()
-        return render_template(
-            "results/all_results.html",
-            values=data,
-            total_pages=total_pages,
-            current_page=page,
-            page=page,
-            per_page=per_page,
-            sort_by_query=sort_by_query,
-            sort_order_query=sort_order_query,
-            sort_by_year=sort_by_year,
-            sort_order_year=sort_order_year
-        )
-    except MySQLdb.OperationalError as e:
-        error_msg = "Terjadi masalah saat mengakses database. Pastikan Database server anda sudah dijalankan."
-        return render_template("error.html", error=error_msg)
+    page = request.args.get("page", default=1, type=int)
+    if request.method == "POST":
+        per_page = int(request.form.get("per_page", "10"))
+        return redirect(url_for('all_results', per_page=per_page, page=1))
+    else:
+        per_page = int(request.args.get("per_page", "10"))
+    offset = (page - 1) * per_page
+    sort_by_query = request.args.get("sortQuery", default="query", type=str)
+    sort_order_query = request.args.get("orderQuery", default="asc", type=str)
+    sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
+    sort_order_year = request.args.get("orderYear", default="asc", type=str)
+    # Buat klausa ORDER BY untuk pengurutan
+    order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
+    # Query data dari database dengan filter dan paginasi
+    query = (
+        f"SELECT * FROM publikasi {order_clause} LIMIT {per_page} OFFSET {offset}"
+    )
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    # cur.execute('''SELECT author, title, publication_year, link FROM crawlings''')
+    data = cur.fetchall()
+    # mengganti nilai None dengan '0'
+    data = [[0 if value is None else value for value in row] for row in data]
+    
+    # Hitung total data untuk paginasi
+    total_data_query = f"SELECT COUNT(*) FROM publikasi"
+    cur.execute(total_data_query)
+    total_data = cur.fetchone()[0]
+    # hitung total halaman
+    total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
+    cur.close()
+    return render_template(
+        "results/all_results.html",
+        values=data,
+        total_pages=total_pages,
+        current_page=page,
+        page=page,
+        per_page=per_page,
+        sort_by_query=sort_by_query,
+        sort_order_query=sort_order_query,
+        sort_by_year=sort_by_year,
+        sort_order_year=sort_order_year
+    )
 
 @app.route("/results/preview_pdf")
 def preview_pdf():
@@ -1020,34 +1056,27 @@ def search_bar():
 #DOSEN
 @app.route("/dosen")
 def dosen():
-    try:
-        page = request.args.get("page", 1, type=int)
-        cur = mysql.connection.cursor()
-        cur.execute("""SELECT * FROM dosen""")
-        data_dosen = cur.fetchall()
-        cur.close()
+    page = request.args.get("page", 1, type=int)
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT * FROM dosen""")
+    data_dosen = cur.fetchall()
+    cur.close()
+    # Tentukan jumlah data per halaman
+    per_page = 10
+    total = len(data_dosen)
+    total_pages = math.ceil(total / per_page)
+    # Tentukan batasan data untuk halaman saat ini
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_data = data_dosen[start:end]
+    return render_template(
+        "/dosen/dosen.html",
+        dosen=paginated_data,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+    )
 
-        # Tentukan jumlah data per halaman
-        per_page = 10
-        total = len(data_dosen)
-        total_pages = math.ceil(total / per_page)
-
-        # Tentukan batasan data untuk halaman saat ini
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_data = data_dosen[start:end]
-
-        return render_template(
-            "/dosen/dosen.html",
-            dosen=paginated_data,
-            page=page,
-            per_page=per_page,
-            total_pages=total_pages,
-        )
-
-    except MySQLdb.OperationalError as e:
-        error_msg = "Terjadi masalah saat mengakses database. Pastikan Database server anda sudah dijalankan."
-        return render_template("error.html", error=error_msg)
 
 @app.route("/dosen/add", methods=["GET", "POST"])
 def dosen_add():

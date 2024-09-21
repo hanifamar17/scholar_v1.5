@@ -29,7 +29,7 @@ Hasil Pencarian
                         hover:text-yellow-800 self-center
                         {% endif %}" href="{{ url_for('all_results') }}">
                         <i class="fa-solid fa-database ml-2 mr-2"></i>
-                        <span>Semua Hasil Pencarian</span>
+                        <span class="mr-2">Semua Hasil Pencarian</span>
                     </a>
                 </div>
             </li>
@@ -43,7 +43,7 @@ Hasil Pencarian
                         hover:text-yellow-800 self-center
                         {% endif %}">
                         <i class="fa-solid fa-database ml-2 mr-2"></i>
-                        <span>Publikasi yang Dikecualikan</span>
+                        <span class="mr-2">Publikasi yang Dikecualikan</span>
                     </a>
                 </div>
             </li>
@@ -51,6 +51,24 @@ Hasil Pencarian
     </nav>
     <content id="content-base" class="space-y-4">
         <h3 class="tracking-wide font-bold text-2xl">Penelitian yang Dikecualikan</h3>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+            <div class="text-blue-800 text-sm bg-blue-50 border border-blue-500 px-4 py-3 rounded relative mb-2" role="alert">
+                <li class="{{ category }}">{{ message }}</li>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">
+                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
 
         <div id="content-table" class="overflow-x-auto pb-8">
             <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
@@ -71,14 +89,14 @@ Hasil Pencarian
                     {% for row in articles %}
                     <tr class=" border-b">
                         <td class="px-3 py-2">{{ loop.index }}</td>
-                        <td class="px-3 py-2">{{row[0]}}</td>
                         <td class="px-3 py-2">{{row[1]}}</td>
-                        <td class="px-3 py-2"><a href="{{row[3]  }}" target="_blank">{{row[2]}}</a></td>
-                        <td class="px-3 py-2"><a href="{{row[5]}}" target="_blank"">{{row[4]}}</a></td>
-                        <td class=" px-3 py-2">{{row[6]}}</td>
+                        <td class="px-3 py-2">{{row[2]}}</td>
+                        <td class="px-3 py-2"><a href="{{row[4]}}" target="_blank">{{row[3]}}</a></td>
+                        <td class="px-3 py-2"><a href="{{row[6]}}" target="_blank"">{{row[5]}}</a></td>
                         <td class=" px-3 py-2">{{row[7]}}</td>
+                        <td class=" px-3 py-2">{{row[8]}}</td>
                         <td class="flex flex-row space-x-8 py-2">
-                            <form action="" method="GET">
+                            <form action="{{ url_for ('false_articles_delete', id_false_articles=row[0])}}" method="post">
                                 <div class="hover:scale-110">
                                     <button type="submit" class="px-3 py-2">
                                         <i type="submit" class="fa-solid fa-ban"></i>

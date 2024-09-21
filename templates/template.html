@@ -108,7 +108,8 @@
 
 
             <a class="inline-flex items-center px-4 py-1 text-base text-center
-                {% if request.path == '/authors' or request.path == '/authors/history_get_articles' or request.path == '/authors/get_profiles' %}
+                {% if request.path == '/authors' or request.path == '/authors/history_get_articles'
+                or request.path == '/authors/get_profiles' or request.path == '/authors/history_profiles' %}
                 text-yellow-600 border-b-2 border-yellow-800
                 {% else %}
                 hover:text-yellow-600 self-center
@@ -117,7 +118,7 @@
 
             <a class="inline-flex items-center px-4 py-1 text-base text-center
                 {% if request.path == '/results' or request.path == '/all_results' or request.path == '/all_results/search-author' 
-                or request.path == '/search_bar_author' or request.path == '/all_results/search_bar' %}
+                or request.path == '/search_bar_author' or request.path == '/all_results/search_bar' or  request.path == '/results/false-articles/view' %}
                 text-yellow-600 border-b-2 border-yellow-800
                 {% else %}
                 hover:text-yellow-600 self-center

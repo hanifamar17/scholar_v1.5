@@ -73,6 +73,45 @@ class ScholarCrawlingPipeline:
     def close_spider(self, spider):
         self.file.close()
 
+class MysqlProfilesCrawlingPipeline:
+    def __init__(self):
+        self.conn = mysql.connector.connect(
+            host = 'localhost',
+            user = 'root',
+            password = '',
+            database = 'publications'
+        )
+
+        ## Create cursor, used to execute commands
+        self.cur = self.conn.cursor()
+   
+    def process_item(self, item_profiles, spider):
+        ## Check to see if text is already in database 
+        self.cur.execute("SELECT * FROM profiles where author_id = %s", (item_profiles['author_id'],))
+        result = self.cur.fetchone()
+
+        if result:
+            spider.logger.warning("Item already in database: %s" % (item_profiles['author_id'],))
+        else:
+            interests_json = json.dumps(item_profiles["interests"])
+            self.cur.execute(""" INSERT INTO profiles (name, affiliations, thumbnail, author_id, interests, created_at, updated_at) 
+                             values (%s,%s,%s,%s,%s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)""", 
+            (
+                item_profiles["name"],
+                item_profiles["affiliations"],
+                item_profiles['thumbnail'],
+                item_profiles["author_id"],
+                interests_json
+            ))
+
+            ## Execute insert of data into database
+            self.conn.commit()
+            spider.logger.info(f"Item inserted into database: {(item_profiles['author_id'],)}")
+        return item_profiles
+        
+    def close_spider(self, spider):
+        self.cur.close()
+        self.conn.close()
 
 class MysqlPipeline:
     def __init__(self):

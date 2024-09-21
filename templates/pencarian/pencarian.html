@@ -24,13 +24,27 @@ Pencarian
             <li aria-current="page">
                 <div class="flex items-center">
                     <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/authors/history_profiles' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('history_profiles') }}">
+                        <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
+                        <span class="mr-2">Riwayat Pencarian Profiles</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
                         {% if request.path == '/authors/history_get_articles' %}
                         text-yellow-600
                         {% else %}
                         hover:text-yellow-800 self-center
                         {% endif %}" href="{{ url_for('history_get_articles') }}">
                         <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
-                        <span>Riwayat Tarik Data</span>
+                        <span class="mr-2">Riwayat Tarik Data</span>
                     </a>
                 </div>
             </li>
@@ -103,6 +117,15 @@ Pencarian
                         <div id="search-results"
                             class="absolute rounded-md bg-white max-h-60 min-w-72 shadow overflow-y-auto"></div>
                     </div>
+                    <div class="flex items-center text-sm text-gray-800 " role="alert">
+                        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                        </svg>
+                        <span class="sr-only">Info</span>
+                        <div>
+                          <span class="font-medium">Info!</span> Gunakan tanda koma ( , ) untuk memisahkan query pencarian.
+                        </div>
+                      </div>
 
                     <div class="flex flex-row flex-row-reverse pb-12">
                         <button type="submit"

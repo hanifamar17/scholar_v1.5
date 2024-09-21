@@ -23,13 +23,27 @@ Riwayat Pencarian
             <li aria-current="page">
                 <div class="flex items-center">
                     <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/authors/history_profiles' %}
+                        text-yellow-600
+                        {% else %}
+                        hover:text-yellow-800 self-center
+                        {% endif %}" href="{{ url_for('history_profiles') }}">
+                        <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
+                        <span class="mr-2">Riwayat Pencarian Profiles</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
                         {% if request.path == '/authors/history_get_articles' %}
                         text-yellow-600
                         {% else %}
                         self-center
                         {% endif %}">
                         <i class="fa-solid fa-clock-rotate-left ml-2 mr-2"></i>
-                        <span>Riwayat Tarik Data</span>
+                        <span class="mr-2">Riwayat Tarik Data</span>
                     </a>
                 </div>
             </li>

@@ -21,6 +21,7 @@ class ProfilesSpider(CrawlSpider):
         'FEED_FORMAT': 'json',
         'ITEM_PIPELINES':{
             "scholar.pipelines.ProfilesCrawlingPipeline":1,
+            "scholar.pipelines.MysqlProfilesCrawlingPipeline":2,
         }
     }
     
