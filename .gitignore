@@ -1,2 +1,4 @@
 .env
-.json
+output.json
+output_dosen.json
+output_profiles.json
