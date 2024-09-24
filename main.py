@@ -11,9 +11,12 @@ from flask import (
 )
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mysqldb import MySQL
+from flask_cors import CORS
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment, Font
+from datetime import datetime as dt
 import mysql.connector
 import MySQLdb
-from flask_cors import CORS
 import subprocess
 import datetime
 import json
@@ -21,12 +24,7 @@ import pandas as pd
 import io
 import os
 import math
-
-from openpyxl import load_workbook
-from openpyxl.styles import Alignment, Font
-
 import pdfkit
-
 
 
 
@@ -38,40 +36,13 @@ app.config["MYSQL_HOST"] = "127.0.0.1"
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = ""
 app.config["MYSQL_DB"] = "publications"
-BACKUP_PATH = 'C:\\Users\\WINDOWS\\Downloads\\backups'
+#BACKUP_PATH = 'C:\\Users\\WINDOWS\\Downloads\\backups'
 
 mysql = MySQL(app)
 
-#BACKUP DATA
-@app.route('/backup', methods=['GET'])
-def backup():
-    try:
-        # Pastikan direktori backup ada
-        if not os.path.exists(BACKUP_PATH):
-            os.makedirs(BACKUP_PATH)
-
-        # Buat nama file backup berdasarkan tanggal dan waktu
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_filename = f"{app.config['MYSQL_DB']}_backup_{timestamp}.sql"
-        backup_filepath = os.path.join(BACKUP_PATH, backup_filename)
-
-        # Command untuk melakukan backup menggunakan mysqldump
-        dump_command = (
-            f"mysqldump -h {app.config['MYSQL_HOST']} "
-            f"-u {app.config['MYSQL_USER']} "
-            f"-p{app.config['MYSQL_PASSWORD']} "
-            f"{app.config['MYSQL_DB']} > {backup_filepath}"
-        )
-
-        # Eksekusi command
-        subprocess.run(dump_command, shell=True, check=True)
-
-        # Mengirim file .sql kepada user untuk di-download
-        return send_file(backup_filepath, as_attachment=True)
-
-    except subprocess.CalledProcessError as e:
-        flash(f"Backup failed: {e}", 'danger')
-        return redirect(url_for('index'))
+#GLOBAL PATH
+MYSQLDUMP_PATH = r'E:\App-Development\1-Tools-Library-Environment\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqldump.exe'
+WKHTMLTOPDF_PATH= r'"E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"'
     
 #ERROR HANDLING GLOBAL
 @app.errorhandler(MySQLdb.OperationalError)
@@ -88,6 +59,145 @@ def internal_server_error(e):
     error_msg = "Terjadi kesalahan internal pada server."
     return render_template("error.html", error=error_msg), 500
  
+#BACKUP-RESTORE
+# Konfigurasi backup directory
+BACKUP_DIR = os.path.join(app.root_path, 'static', 'backups')
+if not os.path.exists(BACKUP_DIR):
+    os.makedirs(BACKUP_DIR)
+
+BACKUP_JSON = os.path.join('static', 'backups_json', 'backups.json')
+def load_backup_data():
+    # Memuat data dari backup.json jika file ada
+    if os.path.exists(BACKUP_JSON):
+        with open(BACKUP_JSON, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def save_backup_data(backups):
+    # Menyimpan data backup ke backup.json
+    with open(BACKUP_JSON, 'w') as f:
+        json.dump(backups, f, indent=4)
+
+def file_size_convert(size_in_bytes):
+    if size_in_bytes < 1024:
+        return f"{size_in_bytes} Bytes"
+    elif size_in_bytes < 1048576:
+        return f"{size_in_bytes / 1024:.2f} KB"
+    elif size_in_bytes < 1073741824:
+        return f"{size_in_bytes / 1048576:.2f} MB"
+    else:
+        return f"{size_in_bytes / 1073741824:.2f} GB"
+
+# Endpoint untuk menampilkan halaman backup dan restore
+@app.route('/backup-restore')
+def backup_restore():
+    # Ambil daftar file backup
+    backups = load_backup_data()
+    for filename in os.listdir(BACKUP_DIR):
+        if filename.endswith('.sql'):
+            filepath = os.path.join(BACKUP_DIR, filename)
+            timestamp = os.path.getmtime(filepath)
+            date = dt.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            size = os.path.getsize(filepath)
+            readable_size = file_size_convert(size)
+            
+            if not any(b['filename'] == filename for b in backups):
+                backups.append({
+                    'filename': filename,
+                    'date': date,
+                    'size': readable_size
+                })          
+    
+    return render_template('/backup/backup-restore.html', backups=backups)
+
+# Endpoint untuk melakukan backup database
+@app.route('/backup', methods=['POST', 'GET'])
+def backup():
+    timestamp = dt.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'backup_{timestamp}.sql'
+    filepath = os.path.join(BACKUP_DIR, filename)
+
+    # Perintah mysqldump (gunakan path lengkap)
+    mysqldump_cmd = [
+        MYSQLDUMP_PATH,
+        '-h', app.config["MYSQL_HOST"],
+        '-u', app.config["MYSQL_USER"],
+        app.config['MYSQL_DB']
+    ]
+
+    # Lakukan backup menggunakan subprocess
+    try:
+        with open(filepath, 'w') as f:
+            subprocess.run(mysqldump_cmd, stdout=f, check=True)
+        
+        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+            flash('Backup berhasil dibuat', 'success')
+
+            # Menambahkan informasi backup baru ke dalam backup.json
+            backups = load_backup_data()  # Load existing backups
+            readable_size = file_size_convert(os.path.getsize(filepath))
+            backups.append({
+                'filename': filename,
+                'date': dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'size': readable_size
+            })
+            save_backup_data(backups)  # Simpan data yang diperbarui ke dalam backup.json
+        else:
+            raise Exception("Backup file is empty")
+    except subprocess.CalledProcessError as e:
+        flash(f"Backup error: {str(e)}", 'error')
+        print(f"Backup error: {str(e)}")
+    except Exception as e:
+        flash(f"Backup error: {str(e)}", 'error')
+        print(f"Backup error: {str(e)}")
+
+    return redirect(url_for('backup_restore'))
+
+# Endpoint untuk mengunduh file backup
+@app.route('/backup/download/<filename>')
+def download(filename):
+    return send_file(os.path.join(BACKUP_DIR, filename), as_attachment=True)
+
+# Endpoint untuk merestore database dari file .sql
+@app.route('/restore', methods=['POST'])
+def restore():
+    if 'file' not in request.files:
+        flash('No file part', 'error')
+        return redirect(url_for('backup_restore'))
+    
+    file = request.files['file']
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(url_for('backup_restore'))
+    
+    if file and file.filename.endswith('.sql'):
+        filepath = os.path.join(BACKUP_DIR, file.filename)
+        file.save(filepath)
+
+        # Perintah mysql untuk restore (gunakan path lengkap)
+        mysql_cmd = [
+            r'E:\App-Development\1-Tools-Library-Environment\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysql.exe',  # Path ke mysql
+            '-h', app.config["MYSQL_HOST"],
+            '-u', app.config["MYSQL_USER"],
+            f'-p{app.config["MYSQL_PASSWORD"]}',
+            app.config['MYSQL_DB']
+        ]
+
+        # Lakukan restore menggunakan subprocess
+        try:
+            with open(filepath, 'r') as f:
+                subprocess.run(mysql_cmd, stdin=f, check=True)
+            flash('Database berhasil di-restore', 'success')
+        except subprocess.CalledProcessError as e:
+            flash(f"Restore error: {str(e)}", 'error')
+            print(f"Restore error: {str(e)}")
+        except Exception as e:
+            flash(f"Restore error: {str(e)}", 'error')
+            print(f"Restore error: {str(e)}")
+
+    return redirect(url_for('backup_restore'))
+
+
 #LOGIN
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -516,6 +626,9 @@ def filtered_articles():
         if result:
             print("Item already in database: %s" % (article['title'],))
         else:
+            publication_year = article['publication_year']
+            if not publication_year or not publication_year.isdigit():
+                publication_year = None
             cur.execute(
                 """INSERT INTO publikasi (query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (article['query'],
@@ -524,7 +637,7 @@ def filtered_articles():
                 article['title_url'],
                 article['cited_by_value'],
                 article['cited_by_url'],
-                article['publication_year'],
+                publication_year,
                 article['publication'],
                 article['thumbnail'],
                 )
@@ -597,7 +710,7 @@ def preview_pdf():
     rendered = render_template("template/template_pdf.html", data_json=data_json)
 
     config = pdfkit.configuration(
-        wkhtmltopdf="E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+        WKHTMLTOPDF_PATH
     )
 
     options = {
@@ -776,7 +889,7 @@ def all_results_preview_pdf():
     rendered = render_template("template/template_pdf_database.html", database=data)
 
     config = pdfkit.configuration(
-        wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+        WKHTMLTOPDF_PATH
     )
 
     options = {
@@ -959,7 +1072,7 @@ def search_author_preview_pdf():
     rendered = render_template("template/template_pdf_search.html", query=data)
 
     config = pdfkit.configuration(
-        wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+        WKHTMLTOPDF_PATH
     )
 
     options = {
@@ -1254,4 +1367,4 @@ def author_crawling():
 
 
 
-app.run(debug=True, host="0.0.0.0", port=4040)
+app.run(debug=True, host="0.0.0.0", port=5000)

@@ -30,6 +30,20 @@
                     </a>
                 </div>
             </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page"></li>
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/backup-restore' %}
+                        text-yellow-600
+                        {% else %}
+                        self-center
+                        {% endif %}" href="{{ url_for('backup_restore') }}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Backup & Restore</span>
+                    </a>
+                </div>
+            </li>
         </ol>    
     </nav>
 

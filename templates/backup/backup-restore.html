@@ -1,0 +1,141 @@
+{%extends 'template.html'%}
+{% block title %}
+Backup & Restore
+{% endblock %}
+{%block content%}
+<div id="all-content" class="space-y-4">
+    <nav class="flex py-4 space-x-4 text-md" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center">
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                    {% if request.path == '/admin' %}
+                    text-yellow-600
+                    {% else %}
+                    hover:text-yellow-800 self-center
+                    {% endif %}" href="{{ url_for('admin') }}">
+                    <i class="fa-solid fa-user mr-2"></i>
+                        <span class="mr-2">Admin</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/dosen' %}
+                        text-yellow-600
+                        {% else %}
+                        self-center
+                        {% endif %}" href="{{ url_for('dosen') }}">
+                        <i class="fa-solid fa-users ml-2 mr-2"></i>
+                        <span>Dosen</span>
+                    </a>
+                </div>
+            </li>
+            <span class="mx-2 text-gray-400">/</span>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <a class="inline-flex items-center py-2 font-normal text-center
+                        {% if request.path == '/backup-restore' %}
+                        text-yellow-600
+                        {% else %}
+                        self-center
+                        {% endif %}">
+                        <i class="fa-solid fa-database ml-2 mr-2"></i>
+                        <span>Backup & Restore</span>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <content id="content-base" class="space-y-4">
+        <section class="mb-8">
+            <h3 class="tracking-wide font-bold text-2xl">Backup Database</h3>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                <div class="text-blue-800 text-sm bg-blue-50 border border-blue-500 px-4 py-3 rounded relative mb-2"
+                    role="alert">
+                    <li class="{{ category }}">{{ message }}</li>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                        onclick="this.parentElement.style.display='none';">
+                        <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20">
+                            <title>Close</title>
+                            <path
+                                d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                        </svg>
+                    </span>
+                </div>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+
+            <div class="flex flex-row-reverse mb-4">
+                <form action="{{ url_for('backup') }}" method="post">
+                    <button type="submit"
+                        class="text-white text-sm text-center py-2 px-4 ml-2 bg-blue-600 rounded hover:bg-blue-800">
+                        Create Backup
+                    </button>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-3 border border-gray-300">Filename</th>
+                            <th class="p-3 border border-gray-300">Date</th>
+                            <th class="p-3 border border-gray-300">Size</th>
+                            <th class="p-3 border border-gray-300">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                        <tr class="hover:bg-gray-100">
+                            <td class="p-3 border border-gray-300">{{ backup.filename }}</td>
+                            <td class="p-3 border border-gray-300">{{ backup.date }}</td>
+                            <td class="p-3 border border-gray-300">{{ backup.size }}</td>
+                            <td class="p-3 border border-gray-300">
+                                <a href="{{ url_for('download', filename=backup.filename) }}"
+                                    class="text-blue-500 hover:text-blue-600">Download</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h3 class="tracking-wide font-bold text-2xl">Restore Database</h3>
+            
+            <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label for="file-upload" class="block text-sm font-medium text-gray-700 my-2">
+                        Choose SQL file to restore
+                    </label>
+                    <input id="file-upload" name="file" type="file" accept=".sql" class="block w-full text-sm text-gray-500
+                    border
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-blue-50 file:text-blue-700
+                                  hover:file:bg-blue-100">
+                </div>
+                <div class="flex flex-row-reverse mb-4">
+                    <button type="submit"
+                        class="text-white text-sm text-center py-2 px-4 ml-2 bg-green-500 rounded hover:bg-green-600">
+                        Restore
+                    </button>
+                </div>
+            </form>
+        </section>
+    </content>
+
+</div>
+{%endblock%}
