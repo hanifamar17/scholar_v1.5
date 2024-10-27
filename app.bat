@@ -14,8 +14,9 @@ start "" "python" "E:\App-Development\scholar_v1.5\main.py"
 REM Wait for main.py (adjust the timeout if necessary)
 timeout /t 10
 
+REM Menjalankan Ngrok untuk port 5000
+start cmd /k ngrok http 5000
+
 REM Open the browser to http://127.0.0.1:4040
 start "" "http://127.0.0.1:5000"
 
-REM Pause to keep the command prompt open
-pause

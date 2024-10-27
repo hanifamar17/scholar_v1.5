@@ -30,18 +30,17 @@
 
 <body class="bg-white text-slate-800">
     <!--HEADER-->
-    <nav id="header" class="w-full z-50 top-0 bg-white px-24 shadow-md sticky">
-        <div class="flex flex-row py-1 justify-between font-normal text-yellow-600">
+    <nav id="header" class="w-full z-50 top-0 bg-white px-24 shadow sticky">
+        <div class="flex flex-row pt-1 justify-between font-normal text-yellow-600">
             <div class="space-x-4 py-2 flex flex-row">
                 <!--LOGO-->
                 <div class="object-left">
-                    <a><img src="{{ url_for('static', filename='css/logo_uin.png')}}" class="w-12"></a>
+                    <a><img src="{{ url_for('static', filename='css/logo_uin.png')}}" class="w-8"></a>
                 </div>
                 <!--NAME-->
-                <div class="text-center flex flex-col leading-normal">
-                    <p class="text-xs tracking-wide">UNIVERSITAS ISLAM NEGERI</p>
-                    <p class="text-lg tracking-wide">SUNAN KALIJAGA</p>
-                    <p class="text-xs tracking-widest">Y O G Y A K A R T A</p>
+                <div class="flex flex-col leading-normal self-center">
+                    <span class="text-sm font-medium tracking-wide">UIN SUNAN KALIJAGA</span>
+                    <span class="text-xs tracking-widest">YOGYAKARTA</span>
                 </div>
             </div>
             <div class="text-sm my-auto tracking-wide">
@@ -104,7 +103,6 @@
         </div>
 
         <div class="flex justify-center items-center space-x-4">
-
             <a class=" inline-flex items-center px-4 py-1 text-base text-center
                 {% if request.path == '/dashboard' %}
                 text-yellow-600 border-b-2 border-yellow-800
@@ -148,7 +146,7 @@
 
 
     <div class="bg-white rounded overflow-auto px-24">
-        <div class="space-y-6">
+        <div class="space-y-6 leading-relaxed">
             {% block content %}
             {% endblock %}
         </div>

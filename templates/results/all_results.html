@@ -48,71 +48,28 @@ Semua Hasil Pencarian
                 </div>
             </li>
         </ol>
-        <form method="GET" action="{{ url_for('search_bar') }}" class="max-w-md mx-auto">
-            <label for="search" class="text-sm font-medium text-gray-900 sr-only">Cari</label>
-            <input type="search" name="search" id="search" required value="{{ request.args.get('search', '') }}"
-                class="min-w-64 max-w-64 p-3 ps-4 text-sm text-gray-900 border border-gray-300 rounded-lg"
-                placeholder="Cari Penulis, Judul..." required />
-            <button type="submit"
-                class="ml-2 p-3 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span class="sr-only">Search</span>
-            </button>
-        </form>
-
     </nav>
+
     <content id="content-base" class="space-y-4">
         <h3 class="tracking-wide font-bold text-2xl">Semua Hasil Pencarian</h3>
 
-
-
-        <form method="GET" action="{{ url_for('all_results_search_author') }}">
-            <div class="flex flex-row space-x-4 py-4 text-sm">
-                <label for="search_author" class="self-center">Tampilkan Author:</label>
-                <select id="search_author" name="query"
-                    class="border rounded-sm border-gray-300 px-2 py-2 min-w-48 max-w-48" required>
-                    <option value="">Pilih Author</option>
-                </select>
-                <div id="search-results"
-                    class="absolute rounded-md bg-white max-w-full max-h-64 shadow overflow-y-auto">
-                </div>
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
-                    <span>Lihat</span>
-                </button>
-            </div>
-        </form>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const sortButton = document.getElementById('sortButton');
-                const sortOptions = document.getElementById('sortOptions');
-
-                sortButton.addEventListener('click', () => {
-                    sortOptions.classList.toggle('hidden');
-                });
-            });
-        </script>
-
-        <form action="{{ url_for('all_results') }}" method="POST">
-            <label>Menampilkan
-                <select type="number" id="per_page" name="per_page" onchange="this.form.submit()" class="border p-1">
-                    <option value="10" {% if per_page==10 %}selected{% endif %}>10</option>
-                    <option value="25" {% if per_page==25 %}selected{% endif %}>25</option>
-                    <option value="50" {% if per_page==50 %}selected{% endif %}>50</option>
-                    <option value="75" {% if per_page==75 %}selected{% endif %}>75</option>
-                    <option value="100" {% if per_page==100 %}selected{% endif %}>100</option>
-                </select>
-                entri
-            </label>
-        </form>
-
         <div class="flex flex-row space-x-4 justify-between">
-            <button id="sortButton"
-                class="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded-md">
-                <i class="fa-solid fa-sliders"></i>
-                <span>urutkan</span>
-            </button>
+            <form method="GET" action="{{ url_for('all_results_search_author') }}">
+                <div class="flex flex-row space-x-4 py-4 text-sm">
+                    <label for="search_author" class="self-center">Tampilkan Author:</label>
+                    <select id="search_author" name="query"
+                        class="border rounded-sm border-gray-300 px-2 py-2 min-w-48 max-w-48" required>
+                        <option value="">Pilih Author</option>
+                    </select>
+                    <div id="search-results"
+                        class="absolute rounded-md bg-white max-w-full max-h-64 shadow overflow-y-auto">
+                    </div>
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
+                        <span>Lihat</span>
+                    </button>
+                </div>
+            </form>
             <div class="flex flex-row items-center space-x-3">
                 <div class="flex flex-row space-x-2">
                     <a href="/all_results/download/excel">
@@ -129,61 +86,6 @@ Semua Hasil Pencarian
                         </button></a>
                 </div>
             </div>
-        </div>
-        <div id="sortOptions" class="hidden mt-4 text-sm">
-            <form action="{{ url_for('all_results') }}" method="get" class="flex flex-row space-x-8">
-                <div class="px-4 flex flex-row space-x-4">
-                    <div class="flex space-x-4">
-                        <label class="self-center" for="orderQuery" name="orderQuery" id="orderQuery" value="query" {%
-                            if sort_by_query=='query' %}selected{% endif %}>Query :</label>
-                        <select name="orderQuery" id="orderQuery" class="px-4 border">
-                            <option value="asc" {% if sort_order_query=='asc' %}selected{% endif %}>Asc</option>
-                            <option value="desc" {% if sort_order_query=='desc' %}selected{% endif %}>Desc
-                            </option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-4">
-                        <label class="self-center" for="sortYear" name="sortYear" id="sortYear" value="publication_year"
-                            {% if sort_by_year=='publication_year' %}selected{% endif %}>Tahun :</label>
-                        <select name="orderYear" id="orderYear" class="py-2 px-4 border">
-                            <option value="asc" {% if sort_order_year=='asc' %}selected{% endif %}>Asc</option>
-                            <option value="desc" {% if sort_order_year=='desc' %}selected{% endif %}>Desc
-                            </option>
-                        </select>
-                    </div>
-                    <button type="submit" name="apply"
-                        class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2">
-                        Urutkan</button>
-                </div>
-            </form>
-        </div>
-
-
-
-        <div id="sortOptions" class="hidden mt-4 text-sm">
-            <form action="{{ url_for('all_results') }}" method="get" class="flex flex-row space-x-8">
-                <div class="bg-gray-100 rounded-md px-4 py-3 flex flex-row space-x-4">
-                    <div class="flex space-x-4">
-                        <label class="self-center" for="orderQuery" name="orderQuery" id="orderQuery" value="query" {%
-                            if sort_by_query=='query' %}selected{% endif %}>Query :</label>
-                        <select name="orderQuery" id="orderQuery" class="py-2 px-8">
-                            <option value="asc" {% if sort_order_query=='asc' %}selected{% endif %}>Asc</option>
-                            <option value="desc" {% if sort_order_query=='desc' %}selected{% endif %}>Desc</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-12">
-                        <label class="self-center" for="sortYear" name="sortYear" id="sortYear" value="publication_year"
-                            {% if sort_by_year=='publication_year' %}selected{% endif %}>Tahun :</label>
-                        <select name="orderYear" id="orderYear" class="py-2 px-8">
-                            <option value="asc" {% if sort_order_year=='asc' %}selected{% endif %}>Asc</option>
-                            <option value="desc" {% if sort_order_year=='desc' %}selected{% endif %}>Desc</option>
-                        </select>
-                    </div>
-                    <button type="submit" name="apply"
-                        class="bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-sm shadow-md text-sm px-5 py-2">
-                        Urutkan</button>
-                </div>
-            </form>
         </div>
 
 
@@ -210,65 +112,114 @@ Semua Hasil Pencarian
             });
         </script>
 
-        <div id="content-table" class="overflow-x-auto pb-8">
-            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
-                <thead class="text-sm text-gray-700 uppercase">
-                    <tr class="text-left border-b-2">
-                        <th scope="col" class="px-3 py-3">No</th>
-                        <th scope="col" class="px-3 py-3 w-1/6">Query</th>
-                        <th scope="col" class="px-3 py-3 w-1/5">Penulis</th>
-                        <th scope="col" class="px-3 py-3">Judul Penelitian</th>
-                        <th scope="col" class="px-3 py-3">Dikutip oleh</th>
-                        <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700">
-                    {% if values %}
-                    {% for row in values %}
-                    <tr class="border-b">
-                        <td class="px-3 py-2">{{ (page - 1) * per_page + loop.index }}</td>
-                        <td class="px-3 py-2">{{row[1]}}</td>
-                        <td class="px-3 py-2">{{row[2]}}</td>
-                        <td class="px-3 py-2"><a href="{{row[4]}}" target="_blank">{{row[3]|default('-')}}</a></td>
-                        <td class="px-3 py-2"><a href="{{row[6]}}" target="_blank"> {{row[5]|default('-')}}</a></td>
-                        <td class="px-3 py-2">{{row[7]}}</td>
-                    </tr>
-                    {% endfor %}
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center pt-4">Tidak ada data yang ditampilkan</td>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- DataTables JS -->
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+        <table class="w-full text-sm text-left text-gray-500 py-4" id="dataTable">
+            <thead class="text-sm text-gray-700 uppercase">
+                <tr>
+                    <th scope="col" class="px-3 py-3">No</th>
+                    <th scope="col" class="px-3 py-3 w-1/6">Query</th>
+                    <th scope="col" class="px-3 py-3 w-1/5">Penulis</th>
+                    <th scope="col" class="px-3 py-3">Judul Penelitian</th>
+                    <th scope="col" class="px-3 py-3">Jumlah Sitasi</th>
+                    <th scope="col" class="px-3 py-3">Tahun Publikasi</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+
+            </tbody>
+        </table>
+        
+        <!--Datatables-->
+        <script>
+            $(document).ready(function () {
+                let prevQueryDir = 'asc'; // Untuk menyimpan arah sorting terakhir kolom query
+
+                $('#dataTable').DataTable({
+                    "responsive": true,
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "/all_results",
+                        "type": "GET",
+                        data: function (d) {
+                            // Tambahkan informasi sorting sebelumnya ke request
+                            d.prev_query_dir = prevQueryDir;
+                            return d;
+                        }
+
+                    },
+                    "columns": [
+                        { "data": "no" },
+                        { "data": "query" },
+                        { "data": "author" },
+                        {
+                            "data": "title",
+                            "render": function (data, type, row, meta) {
+                                if (type === 'display') {
+                                    return '<a href="' + row.title_url + '" target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            }
+                        },
+                        {
+                            "data": "cited_by_value",
+                            "render": function (data, type, row, meta) {
+                                if (type === 'display') {
+                                    return '<a href="' + row.cited_by_url + '" target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            }
+                        },
+                        { "data": "publication_year" }
+                    ],
+                    "order": [[1, "asc"]],  // Default sorting on 'query' column
+                    createdRow: function (row, data, dataIndex) {
+                        // Debugging: Periksa apakah fungsi ini dipanggil
+                        //console.log('Row created', row, data, dataIndex);
+                        $(row).find('td').each(function (index, td) {
+                            $(td).addClass('px-6 text-gray-700 border-b');
+                            $(td).css({
+                                "padding-left": "1.1rem",
+                                "padding-right": "1.1rem"
+                            });
+                        });
+                    },
+                    // Styling untuk header
+                    "headerCallback": function (thead, data, start, end, display) {
+                        $(thead).find('th').addClass('text-gray-700 bg-gray-50 px-3 py-3');
+                    },
+                    columnDefs: [
+                        {
+                            // Kolom yang tidak bisa di-sort
+                            targets: [0, 2, 3, 4],
+                            orderable: false,
+                            className: 'no-sort' // Tambahkan class untuk styling
+                        },
+                        {
+                            // Kolom yang bisa di-sort
+                            targets: [1, 5],
+                            orderable: true
+                        }
+                    ],
+                    drawCallback: function (settings) {
+                        // Update prevQueryDir saat tabel di-refresh
+                        let order = settings.aaSorting;
+                        if (order.length > 0 && order[0][0] === 1) { // Jika sorting pada kolom query
+                            prevQueryDir = order[0][1]; // Simpan arah sorting query
+                        }
+                    }
+                });
+            });
+        </script>
     </content>
 
-
-    <!-- Display pagination -->
-    <pagination class="pagination space-x-2 flex items-center justify-center">
-        {% if page > 1 %}
-        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
-            href="{{ url_for('all_results', page=1, per_page=per_page) }}&sortQuery={{ sort_by_query }}&orderQuery={{ sort_order_query }}&sortYear={{ sort_by_year }}&orderYear={{ sort_order_year }}">
-            <i class="text-gray-800 fa-solid fa-angles-left" style="color: rgb(107 114 128);"></i>
-        </a>
-        <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
-            href="{{ url_for('all_results', page=page-1, per_page=per_page) }}&sortQuery={{ sort_by_query }}&orderQuery={{ sort_order_query }}&sortYear={{ sort_by_year }}&orderYear={{ sort_order_year }}">
-            <i class="text-gray-800 fa-solid fa-angle-left" style="color: rgb(107 114 128);"></i>
-        </a>
-        {% endif %}
-
-        <span>Page {{ page }} of {{ total_pages }}</span>
-
-        {% if page < total_pages %} <a
-            class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
-            href="{{ url_for('all_results', page=page+1, per_page=per_page) }}&sortQuery={{ sort_by_query }}&orderQuery={{ sort_order_query }}&sortYear={{ sort_by_year }}&orderYear={{ sort_order_year }}">
-            <i class="text-gray-800 fa-solid fa-angle-right" style="color: rgb(107 114 128);"></i>
-            </a>
-            <a class="page-link px-4 py-2 rounded border-2 border-gray-300 hover:shadow-md transition duration-500"
-                href="{{ url_for('all_results', page=total_pages, per_page=per_page) }}&sortQuery={{ sort_by_query }}&orderQuery={{ sort_order_query }}&sortYear={{ sort_by_year }}&orderYear={{ sort_order_year }}">
-                <i class="text-gray-800 fa-solid fa-angles-right" style="color: rgb(107 114 128);"></i>
-            </a>
-            {% endif %}
-    </pagination>
-    {%endblock%}
+</div>
+</content>
+{%endblock%}

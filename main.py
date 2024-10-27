@@ -25,11 +25,12 @@ import io
 import os
 import math
 import pdfkit
+from dotenv import load_dotenv
 
 
-
+load_dotenv()
 app = Flask(__name__, static_url_path="/static")
-app.secret_key = b"\xa9v6\xee5\xd1\xa7pr\x9fh\xb8\xa6{\xbdR<=\x04n\xbc\xdcUT"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 CORS(app)
 
 app.config["MYSQL_HOST"] = "127.0.0.1"
@@ -42,7 +43,8 @@ mysql = MySQL(app)
 
 #GLOBAL PATH
 MYSQLDUMP_PATH = r'E:\App-Development\1-Tools-Library-Environment\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqldump.exe'
-WKHTMLTOPDF_PATH= r'"E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"'
+WKHTMLTOPDF_PATH= r'E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+FLASK_PORT=5000
     
 #ERROR HANDLING GLOBAL
 @app.errorhandler(MySQLdb.OperationalError)
@@ -58,7 +60,7 @@ def page_not_found(e):
 def internal_server_error(e):
     error_msg = "Terjadi kesalahan internal pada server."
     return render_template("error.html", error=error_msg), 500
- 
+
 #BACKUP-RESTORE
 # Konfigurasi backup directory
 BACKUP_DIR = os.path.join(app.root_path, 'static', 'backups')
@@ -197,7 +199,6 @@ def restore():
 
     return redirect(url_for('backup_restore'))
 
-
 #LOGIN
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -247,14 +248,14 @@ def login():
         error_msg = "Terjadi masalah saat mengakses sistem. Pastikan Database server anda sudah dijalankan."
         return render_template("error-login.html", error=error_msg)
 
-@app.route("/testing", methods=["GET", "POST"])
-def testing():
-    if request.method == "POST":
-        selected_articles = request.form.getlist("selected_articles")
-        selected = ", ".join(selected_articles)
-
-        # Format string pengembalian untuk debug
-        return f"Received author_id: {selected}"
+#@app.route("/testing", methods=["GET", "POST"])
+#def testing():
+#    if request.method == "POST":
+#        selected_articles = request.form.getlist("selected_articles")
+#        selected = ", ".join(selected_articles)
+#
+#        # Format string pengembalian untuk debug
+#        return f"Received author_id: {selected}"
 
 @app.route("/dashboard")
 @login_required
@@ -471,51 +472,124 @@ def history_profiles():
     return render_template("pencarian/history_profiles.html", history_profiles=converted_profiles)
 
 #HASIL PENCARIAN
+#@app.route("/results", methods=["GET", "POST"])
+#def results():
+#    page = request.args.get("page", 1, type=int)
+#
+#    if request.method == "POST":
+#        per_page = int(request.form.get("per_page", "10"))
+#        return redirect(url_for('results', per_page=per_page, page=1))
+#    else:
+#        per_page = int(request.args.get("per_page", "10"))
+#
+#    with open("output.json", 'r', encoding='utf-8') as f:
+#        data = json.load(f)
+#
+#     # Ganti nilai None dengan 0
+#    for item in data:
+#        for key, value in item.items():
+#            if value is None:
+#                item[key] = 0
+#
+#    # Dapatkan semua query yang unik
+#    queries = set(item["query"].lower() for item in data if "query" in item)
+#    queries = list(queries)
+#
+#    # for entry in data:
+#    #   entry['title'] = entry['title'][0] if entry['title'] else ""
+#
+#    data_sorted = sorted(data, key=lambda x: x["query"])    
+#
+#    # Tentukan jumlah data per halaman
+#    total = len(data_sorted)
+#    total_pages = math.ceil(total / per_page)
+#
+#    # Tentukan batasan data untuk halaman saat ini
+#    start = (page - 1) * per_page
+#    end = start + per_page
+#    paginated_data = data_sorted[start:end]
+#
+#    return render_template(
+#        "results/results.html",
+#        value=paginated_data,
+#        queries=queries,
+#        page=page,
+#        per_page=per_page,
+#        total_pages=total_pages,
+#    )
+
 @app.route("/results", methods=["GET", "POST"])
 def results():
-    page = request.args.get("page", 1, type=int)
+    if request.args.get('draw'):
+        with open("output.json", 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-    if request.method == "POST":
-        per_page = int(request.form.get("per_page", "10"))
-        return redirect(url_for('results', per_page=per_page, page=1))
-    else:
-        per_page = int(request.args.get("per_page", "10"))
+         # Ganti nilai None dengan 0
+        for item in data:
+            for key, value in item.items():
+                if value is None:
+                    item[key] = 0
+        
+        draw = request.args.get('draw')
+        start = int(request.args.get('start', 0))  # start point
+        length = int(request.args.get('length', 10))  # number of records per page
+        search_value = request.args.get('search[value]', '')  # search term
 
+        order_column = request.args.get('order[0][column]', '0')  # Default column is query
+        order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
+
+        if order_column == "0":  # Jika user mengklik kolom query
+            query_direction = order_dir
+        
+
+
+        # Filter data berdasarkan search_value
+        if search_value:
+            filtered_data = [
+                item for item in data 
+                if search_value in str(item.get("query", "")).lower() or
+                   search_value in str(item.get("author", "")).lower() or
+                   search_value in str(item.get("title", "")).lower() or
+                   search_value in str(item.get("title_by_url", "")).lower() or
+                   search_value in str(item.get("cited_by_value", "")).lower() or
+                   search_value in str(item.get("cited_by_url", "")).lower() or
+                   search_value in str(item.get("publication_year", "")).lower() or
+                   search_value in str(item.get("publication", "")).lower()
+            ]
+        else:
+            filtered_data = data
+        
+        filtered_data_sort = sorted(filtered_data, key=lambda x: x.get(query_direction, ''), reverse=(order_dir == 'desc'))
+
+        # Pagination (limit and offset)
+        page_data = filtered_data_sort[start:start + length]
+
+        results = [{
+                "no": start + i + 1,
+                "query": row.get("query", ""),
+                "author": row.get("author", ""),
+                "title": row.get("title", ""),
+                "title_url": row.get("title_url", ""),
+                "cited_by_value": row.get("cited_by_value", ""),
+                "cited_by_url": row.get("cited_by_url", ""),
+                "publication_year": row.get("publication_year", ""),
+                "publication": row.get("publication", "")
+        } for i, row in enumerate(page_data)] 
+
+        return jsonify({
+                "draw": draw,
+                "recordsTotal": len(data),
+                "recordsFiltered": len(filtered_data_sort),
+                "data": results
+            })
+    
     with open("output.json", 'r', encoding='utf-8') as f:
-        data = json.load(f)
+            data = json.load(f)
 
-     # Ganti nilai None dengan 0
-    for item in data:
-        for key, value in item.items():
-            if value is None:
-                item[key] = 0
-
-    # Dapatkan semua query yang unik
     queries = set(item["query"].lower() for item in data if "query" in item)
     queries = list(queries)
 
-    # for entry in data:
-    #   entry['title'] = entry['title'][0] if entry['title'] else ""
-
-    data_sorted = sorted(data, key=lambda x: x["query"])    
-
-    # Tentukan jumlah data per halaman
-    total = len(data_sorted)
-    total_pages = math.ceil(total / per_page)
-
-    # Tentukan batasan data untuk halaman saat ini
-    start = (page - 1) * per_page
-    end = start + per_page
-    paginated_data = data_sorted[start:end]
-
-    return render_template(
-        "results/results.html",
-        value=paginated_data,
-        queries=queries,
-        page=page,
-        per_page=per_page,
-        total_pages=total_pages,
-    )
+    return render_template("results/results.html", queries=queries)
 
 @app.route("/results/false-articles", methods=["GET", "POST"])
 def false_articles():
@@ -648,51 +722,145 @@ def filtered_articles():
     
 
 
+#@app.route("/all_results", methods=["GET", "POST"])
+#def all_results():
+#    page = request.args.get("page", default=1, type=int)
+#    if request.method == "POST":
+#        per_page = int(request.form.get("per_page", "10"))
+#        return redirect(url_for('all_results', per_page=per_page, page=1))
+#    else:
+#        per_page = int(request.args.get("per_page", "10"))
+#    offset = (page - 1) * per_page
+#    sort_by_query = request.args.get("sortQuery", default="query", type=str)
+#    sort_order_query = request.args.get("orderQuery", default="asc", type=str)
+#    sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
+#    sort_order_year = request.args.get("orderYear", default="asc", type=str)
+#    # Buat klausa ORDER BY untuk pengurutan
+#    order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
+#    # Query data dari database dengan filter dan paginasi
+#    query = (
+#        f"SELECT * FROM publikasi {order_clause} LIMIT {per_page} OFFSET {offset}"
+#    )
+#    cur = mysql.connection.cursor()
+#    cur.execute(query)
+#    # cur.execute('''SELECT author, title, publication_year, link FROM crawlings''')
+#    data = cur.fetchall()
+#    # mengganti nilai None dengan '0'
+#    data = [[0 if value is None else value for value in row] for row in data]
+#    
+#    # Hitung total data untuk paginasi
+#    total_data_query = f"SELECT COUNT(*) FROM publikasi"
+#    cur.execute(total_data_query)
+#    total_data = cur.fetchone()[0]
+#    # hitung total halaman
+#    total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
+#    cur.close()
+#    return render_template(
+#        "results/all_results.html",
+#        values=data,
+#        total_pages=total_pages,
+#        current_page=page,
+#        page=page,
+#        per_page=per_page,
+#        sort_by_query=sort_by_query,
+#        sort_order_query=sort_order_query,
+#        sort_by_year=sort_by_year,
+#        sort_order_year=sort_order_year
+#    )
+
 @app.route("/all_results", methods=["GET", "POST"])
 def all_results():
-    page = request.args.get("page", default=1, type=int)
-    if request.method == "POST":
-        per_page = int(request.form.get("per_page", "10"))
-        return redirect(url_for('all_results', per_page=per_page, page=1))
-    else:
-        per_page = int(request.args.get("per_page", "10"))
-    offset = (page - 1) * per_page
-    sort_by_query = request.args.get("sortQuery", default="query", type=str)
-    sort_order_query = request.args.get("orderQuery", default="asc", type=str)
-    sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
-    sort_order_year = request.args.get("orderYear", default="asc", type=str)
-    # Buat klausa ORDER BY untuk pengurutan
-    order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
-    # Query data dari database dengan filter dan paginasi
-    query = (
-        f"SELECT * FROM publikasi {order_clause} LIMIT {per_page} OFFSET {offset}"
-    )
-    cur = mysql.connection.cursor()
-    cur.execute(query)
-    # cur.execute('''SELECT author, title, publication_year, link FROM crawlings''')
-    data = cur.fetchall()
-    # mengganti nilai None dengan '0'
-    data = [[0 if value is None else value for value in row] for row in data]
+    try:
+        if request.args.get('draw'):
+            draw = request.args.get('draw')
+            start = int(request.args.get('start', 0))  # start point
+            length = int(request.args.get('length', 10))  # number of records per page
+            search_value = request.args.get('search[value]', '')  # search term
+            
+            # Ambil parameter sorting dari DataTables
+            order_column = request.args.get('order[0][column]', '1')  # Default column is query
+            order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
+            
+            # Inisialisasi variabel untuk menyimpan arah sorting masing-masing kolom
+            query_direction = 'asc'  # Default untuk query
+            year_direction = 'asc'   # Default untuk publication_year
+            
+            # Logika sorting yang independen
+            if order_column == "1":  # Jika user mengklik kolom query
+                query_direction = order_dir
+                # year_direction tetap asc (default) atau mengikuti sorting terakhir
+                
+            elif order_column == "5":  # Jika user mengklik kolom publication_year
+                year_direction = order_dir
+                # Ambil sorting terakhir untuk query dari session jika ada
+                prev_query_dir = request.args.get('prev_query_dir', 'asc')
+                query_direction = prev_query_dir
+            
+            # Susun string ORDER BY
+            order_by = f"query {query_direction}, publication_year {year_direction}"
+            
+            # Debug: Print sorting parameters
+            print(f"Clicked Column: {order_column}")
+            print(f"Click Direction: {order_dir}")
+            print(f"Query Direction: {query_direction}")
+            print(f"Year Direction: {year_direction}")
+            print(f"Final ORDER BY: {order_by}")
+            
+            # Query with searching
+            search_clause = f"WHERE query LIKE %s OR author LIKE %s OR title LIKE %s OR cited_by_value LIKE %s OR publication_year LIKE %s"
+            search_param = f"%{search_value}%"
+
+            # Main query with search, sorting, and pagination
+            query = (
+                f"SELECT * FROM publikasi {search_clause} ORDER BY {order_by} LIMIT %s OFFSET %s"
+            )
+
+            cur = mysql.connection.cursor()
+            #print(f"Executing query: {query}")  # Tambahkan logging query
+            cur.execute(query, (search_param, search_param, search_param, search_param, search_param, length, start))
+            data = cur.fetchall()
+
+            # Replace None values with '0'
+            data = [[0 if value is None else value for value in row] for row in data]
+
+            # Count total data
+            cur.execute("SELECT COUNT(*) FROM publikasi")
+            total_data = cur.fetchone()[0]
+
+            # Count filtered data (based on search query)
+            cur.execute(f"SELECT COUNT(*) FROM publikasi {search_clause}", 
+                        (search_param, search_param, search_param, search_param, search_param))
+            filtered_data = cur.fetchone()[0]
+
+            cur.close()
+
+            # Prepare the data in DataTables format
+            results = [{
+                "no": start + i + 1,
+                "query": row[1],
+                "author": row[2],
+                "title": row[3],
+                "title_url": row[4],
+                "cited_by_value": row[5],
+                "cited_by_url": row[6],
+                "publication_year": row[7]
+            } for i, row in enumerate(data)]
+
+            # Return the JSON response
+            return jsonify({
+                "draw": draw,
+                "recordsTotal": total_data,
+                "recordsFiltered": filtered_data,
+                "data": results
+            })
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
     
-    # Hitung total data untuk paginasi
-    total_data_query = f"SELECT COUNT(*) FROM publikasi"
-    cur.execute(total_data_query)
-    total_data = cur.fetchone()[0]
-    # hitung total halaman
-    total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
-    cur.close()
-    return render_template(
-        "results/all_results.html",
-        values=data,
-        total_pages=total_pages,
-        current_page=page,
-        page=page,
-        per_page=per_page,
-        sort_by_query=sort_by_query,
-        sort_order_query=sort_order_query,
-        sort_by_year=sort_by_year,
-        sort_order_year=sort_order_year
-    )
+    # Default GET request for the template rendering
+    return render_template("results/all_results.html")
+
 
 @app.route("/results/preview_pdf")
 def preview_pdf():
@@ -709,9 +877,7 @@ def preview_pdf():
 
     rendered = render_template("template/template_pdf.html", data_json=data_json)
 
-    config = pdfkit.configuration(
-        WKHTMLTOPDF_PATH
-    )
+    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
 
     options = {
         "enable-local-file-access": None,
@@ -888,9 +1054,7 @@ def all_results_preview_pdf():
 
     rendered = render_template("template/template_pdf_database.html", database=data)
 
-    config = pdfkit.configuration(
-        WKHTMLTOPDF_PATH
-    )
+    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
 
     options = {
         "enable-local-file-access": None,
@@ -913,57 +1077,139 @@ def all_results_preview_pdf():
 
 
 #ALL_RESULTS/PENCARIAN
+#@app.route("/all_results/search-author", methods=["GET", "POST"])
+#def all_results_search_author():
+#    page = request.args.get("page", default=1, type=int)
+#    author = request.args.get("query", "")
+#    session['get_author']=author
+#
+#    if request.method == "POST":
+#        per_page = int(request.form.get("per_page", "10"))
+#        author = request.form.get("query", "")
+#        return redirect(url_for('all_results_search_author', per_page=per_page, page=1, query=author))
+#    else:
+#        per_page = int(request.args.get("per_page", "10"))
+#        author = request.args.get("query", "")
+#    offset = (page - 1) * per_page
+#
+#    sort_by_query = request.args.get("sortQuery", default="query", type=str)
+#    sort_order_query = request.args.get("orderQuery", default="asc", type=str)
+#
+#    sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
+#    sort_order_year = request.args.get("orderYear", default="asc", type=str)
+#
+#    # Buat klausa ORDER BY untuk pengurutan
+#    order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
+#    
+#    query = f"SELECT * FROM publikasi WHERE query = %s {order_clause} LIMIT %s OFFSET %s"
+#
+#    cur = mysql.connection.cursor()
+#    cur.execute(query, (author, per_page, offset))
+#    data = cur.fetchall()
+#
+#    # mengganti nilai None dengan '0'
+#    data = [[0 if value is None else value for value in row] for row in data]
+#
+#    total_data_query = "SELECT COUNT(*) FROM publikasi WHERE query = %s"
+#    cur.execute(total_data_query, (author,))
+#    total_data = cur.fetchone()[0]
+#
+#    total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
+#
+#    return render_template(
+#        "results/search_author_results.html",
+#        search_value=data,
+#        author=author,
+#        page=page,
+#        total_pages=total_pages,
+#        per_page=per_page,
+#        sort_by_query=sort_by_query,
+#        sort_order_query=sort_order_query,
+#        sort_by_year=sort_by_year,
+#        sort_order_year=sort_order_year
+#    )
 @app.route("/all_results/search-author", methods=["GET", "POST"])
 def all_results_search_author():
-    page = request.args.get("page", default=1, type=int)
-    author = request.args.get("query", "")
-    session['get_author']=author
+    try:    
+        if request.method == "POST":
+            author = request.form.get("query", "")
+            session['author'] = author
+            return redirect(url_for('all_results_search_author'))
+        
+        if request.args.get('draw'):
+            author = session.get("author", "")
+            print("Author:", author)
+            
+            #parameter datatables
+            draw = request.args.get('draw')
+            start = int(request.args.get('start', 0))
+            length = int(request.args.get('length', 10))
+            search_value = request.args.get('search[value]', '')
 
-    if request.method == "POST":
-        per_page = int(request.form.get("per_page", "10"))
-        author = request.form.get("query", "")
-        return redirect(url_for('all_results_search_author', per_page=per_page, page=1, query=author))
-    else:
-        per_page = int(request.args.get("per_page", "10"))
-        author = request.args.get("query", "")
-    offset = (page - 1) * per_page
+            order_column = request.args.get('order[0][column]', '5')  # Default column is year
+            order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
 
-    sort_by_query = request.args.get("sortQuery", default="query", type=str)
-    sort_order_query = request.args.get("orderQuery", default="asc", type=str)
+            # Inisialisasi variabel untuk menyimpan arah sorting masing-masing kolom
+            year_direction = 'asc'   # Default untuk publication_year
 
-    sort_by_year = request.args.get("sortYear", default="publication_year", type=str)
-    sort_order_year = request.args.get("orderYear", default="asc", type=str)
-
-    # Buat klausa ORDER BY untuk pengurutan
-    order_clause = f"ORDER BY {sort_by_query} {sort_order_query}, {sort_by_year} {sort_order_year}"
+            # Logika sorting yang independen
+            if order_column == "5":  # Jika user mengklik kolom year
+                year_direction = order_dir
+            
+            # Susun string ORDER BY
+            order_by = f"publication_year {year_direction}"
     
-    query = f"SELECT * FROM publikasi WHERE query = %s {order_clause} LIMIT %s OFFSET %s"
+            # Query with searching
+            search_clause = "WHERE query = %s AND (author LIKE %s OR title LIKE %s OR cited_by_value LIKE %s OR publication_year LIKE %s)"
+            search_param = f"%{search_value}%"
+    
+            query = f"SELECT * FROM publikasi {search_clause} ORDER BY {order_by} LIMIT %s OFFSET %s"
+    
+            cur = mysql.connection.cursor()
+            cur.execute(query, (author, search_param, search_param, search_param, search_param, length, start))
+            data = cur.fetchall()
+    
+            print("SQL Query:", query)
+            print("Parameters:", (author, search_param, search_param, search_param, search_param, length, start))
+    
+            # mengganti nilai None dengan '0'
+            data = [[0 if value is None else value for value in row] for row in data]
+    
+            # Count total data
+            cur.execute("SELECT COUNT(*) FROM publikasi")
+            total_data = cur.fetchone()[0]
+    
+            # Query untuk menghitung data yang difilter
+            cur.execute(f"SELECT COUNT(*) FROM publikasi {search_clause}", 
+                            (author, search_param, search_param, search_param, search_param))
+            total_filtered_data = cur.fetchone()[0]
+    
+            results = [{
+                "no": start + i + 1,
+                "query": row[1],
+                "author": row[2],
+                "title": row[3],
+                "title_url": row[4],
+                "cited_by_value": row[5],
+                "cited_by_url": row[6],
+                "publication_year": row[7]
+            } for i, row in enumerate(data)]
+    
+            cur.close()
+            return jsonify({
+                    "draw": draw,
+                    "recordsTotal": total_data,
+                    "recordsFiltered": total_filtered_data,
+                    "data": results,
+            })
+        
+        author = session.get("author", "")
+        return render_template("results/search_author_results.html", author=author)
+               
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
-    cur = mysql.connection.cursor()
-    cur.execute(query, (author, per_page, offset))
-    data = cur.fetchall()
-
-    # mengganti nilai None dengan '0'
-    data = [[0 if value is None else value for value in row] for row in data]
-
-    total_data_query = "SELECT COUNT(*) FROM publikasi WHERE query = %s"
-    cur.execute(total_data_query, (author,))
-    total_data = cur.fetchone()[0]
-
-    total_pages = (total_data // per_page) + (1 if total_data % per_page > 0 else 0)
-
-    return render_template(
-        "results/search_author_results.html",
-        search_value=data,
-        author=author,
-        page=page,
-        total_pages=total_pages,
-        per_page=per_page,
-        sort_by_query=sort_by_query,
-        sort_order_query=sort_order_query,
-        sort_by_year=sort_by_year,
-        sort_order_year=sort_order_year
-    )
 
 @app.route("/search-author", methods=["GET"])
 def search_author():
@@ -1071,9 +1317,7 @@ def search_author_preview_pdf():
 
     rendered = render_template("template/template_pdf_search.html", query=data)
 
-    config = pdfkit.configuration(
-        WKHTMLTOPDF_PATH
-    )
+    config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
 
     options = {
         "enable-local-file-access": None,
@@ -1365,6 +1609,5 @@ def author_crawling():
     with open("output.json") as items_file:
         return render_template("author.html", author_output=items_file.read())
 
-
-
-app.run(debug=True, host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0", port=FLASK_PORT)
