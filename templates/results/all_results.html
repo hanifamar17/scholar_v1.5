@@ -184,6 +184,7 @@ Semua Hasil Pencarian
                         // Debugging: Periksa apakah fungsi ini dipanggil
                         //console.log('Row created', row, data, dataIndex);
                         $(row).find('td').each(function (index, td) {
+                            $(row).addClass('hover:bg-gray-100');
                             $(td).addClass('px-6 text-gray-700 border-b');
                             $(td).css({
                                 "padding-left": "1.1rem",

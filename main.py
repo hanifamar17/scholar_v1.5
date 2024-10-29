@@ -642,12 +642,83 @@ def false_articles():
     
 @app.route("/results/false-articles/view")
 def false_articles_view():
-    cur = mysql.connection.cursor()
-    cur.execute("""SELECT id_false_articles, query, author, title, title_url, cited_by_value, cited_by_url, publication_year, publication, thumbnail FROM false_articles""")
-    false_articles = cur.fetchall()
-    cur.close()
+    if request.args.get('draw'):
+        draw = request.args.get('draw')
+        start = int(request.args.get('start', 0))  # start point
+        length = int(request.args.get('length', 10))  # number of records per page
+        search_value = request.args.get('search[value]', '')  # search term
+    
+        # Ambil parameter sorting dari DataTables
+        order_column = request.args.get('order[0][column]', '1')  # Default column is query
+        order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
+    
+        # Inisialisasi variabel untuk menyimpan arah sorting masing-masing kolom
+        query_direction = 'asc'  # Default untuk query
+        year_direction = 'asc'   # Default untuk publication_year
+    
+        # Logika sorting yang independen
+        if order_column == "1":  # Jika user mengklik kolom query
+            query_direction = order_dir
+        
+        elif order_column == "5":  # Jika user mengklik kolom publication_year
+            year_direction = order_dir
+            # Ambil sorting terakhir untuk query dari session jika ada
+            prev_query_dir = request.args.get('prev_query_dir', 'asc')
+            query_direction = prev_query_dir
+    
+        # Susun string ORDER BY
+        order_by = f"query {query_direction}, publication_year {year_direction}"
+        
+        # Query with searching
+        search_clause = f"WHERE query LIKE %s OR author LIKE %s OR title LIKE %s OR cited_by_value LIKE %s OR publication_year LIKE %s OR publication LIKE %s"
+        search_param = f"%{search_value}%"
+        
+        # Main query with search, sorting, and pagination
+        query = (
+                f"SELECT * FROM false_articles {search_clause} ORDER BY {order_by} LIMIT %s OFFSET %s"
+        )
+        
+        cur = mysql.connection.cursor()
+        cur.execute(query, (search_param, search_param, search_param, search_param, search_param, search_param, length, start))
+        false_articles = cur.fetchall()
 
-    return render_template("results/false_articles.html", articles=false_articles)
+        # Replace None values with '0'
+        false_articles = [[0 if value is None else value for value in row] for row in false_articles]
+
+        # Count total data
+        cur.execute("SELECT COUNT(*) FROM false_articles")
+        total_data = cur.fetchone()[0]
+
+        # Count filtered data (based on search query)
+        cur.execute(f"SELECT COUNT(*) FROM false_articles {search_clause}", 
+                        (search_param, search_param, search_param, search_param, search_param, search_param))
+        filtered_data = cur.fetchone()[0]
+
+        cur.close()
+
+        # Prepare the data in DataTables format
+        results = [{
+                "no": start + i + 1,
+                "id_false_articles": row[0],
+                "query": row[1],
+                "author": row[2],
+                "title": row[3],
+                "title_url": row[4],
+                "cited_by_value": row[5],
+                "cited_by_url": row[6],
+                "publication_year": row[7],
+                "publication": row[8],
+        } for i, row in enumerate(false_articles)]
+
+        # Return the JSON response
+        return jsonify({
+                "draw": draw,
+                "recordsTotal": total_data,
+                "recordsFiltered": filtered_data,
+                "data": results
+        })
+
+    return render_template("results/false_articles.html")
 
 @app.route("/results/false-articles/delete/<int:id_false_articles>", methods=["GET", "POST"])
 def false_articles_delete(id_false_articles):
@@ -1411,28 +1482,108 @@ def search_bar():
 
 
 #DOSEN
+#@app.route("/dosen")
+#def dosen():
+#    page = request.args.get("page", 1, type=int)
+#    cur = mysql.connection.cursor()
+#    cur.execute("""SELECT * FROM dosen""")
+#    data_dosen = cur.fetchall()
+#    cur.close()
+#    # Tentukan jumlah data per halaman
+#    per_page = 10
+#    total = len(data_dosen)
+#    total_pages = math.ceil(total / per_page)
+#    # Tentukan batasan data untuk halaman saat ini
+#    start = (page - 1) * per_page
+#    end = start + per_page
+#    paginated_data = data_dosen[start:end]
+#    return render_template(
+#        "/dosen/dosen.html",
+#        dosen=paginated_data,
+#        page=page,
+#        per_page=per_page,
+#        total_pages=total_pages,
+#    )
+
 @app.route("/dosen")
 def dosen():
-    page = request.args.get("page", 1, type=int)
-    cur = mysql.connection.cursor()
-    cur.execute("""SELECT * FROM dosen""")
-    data_dosen = cur.fetchall()
-    cur.close()
-    # Tentukan jumlah data per halaman
-    per_page = 10
-    total = len(data_dosen)
-    total_pages = math.ceil(total / per_page)
-    # Tentukan batasan data untuk halaman saat ini
-    start = (page - 1) * per_page
-    end = start + per_page
-    paginated_data = data_dosen[start:end]
-    return render_template(
-        "/dosen/dosen.html",
-        dosen=paginated_data,
-        page=page,
-        per_page=per_page,
-        total_pages=total_pages,
-    )
+    if request.args.get('draw'):
+        draw = request.args.get('draw')
+        start = int(request.args.get('start', 0))  # start point
+        length = int(request.args.get('length', 10))  # number of records per page
+        search_value = request.args.get('search[value]', '')  # search term
+        
+        # Ambil parameter sorting dari DataTables
+        order_column = request.args.get('order[0][column]', '1')  # Default column is nama_dosen
+        order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
+
+        name_direction = 'asc'
+        prodi_direction = 'asc'
+        
+        if order_column == "1":  # Jika user mengklik kolom nama dosen
+            name_direction = order_dir
+
+        elif order_column == "2":  # Jika user mengklik kolom publication_year
+            prodi_direction = order_dir
+            # Ambil sorting terakhir untuk nama dosen dari session jika ada
+            prev_query_dir = request.args.get('prev_query_dir', 'asc')
+            name_direction = prev_query_dir
+        
+        #order_by = f"nama_dosen {name_direction}, prodi {prodi_direction}"
+
+        order_by = (
+            f"nama_dosen {name_direction}, "
+            f"SUBSTRING_INDEX(prodi, ' ', 1) {prodi_direction}, "  # Sort by level (e.g., S-1, S-2)
+            f"SUBSTRING_INDEX(prodi, ' ', -1) {prodi_direction}"  # Sort by program name within each level
+        )
+
+        # Query with searching
+        search_clause = f"WHERE nama_dosen LIKE %s OR prodi LIKE %s"
+        search_param = f"%{search_value}%"
+
+        # Main query with search, sorting, and pagination
+        query = (
+                f"SELECT * FROM dosen {search_clause} ORDER BY {order_by} LIMIT %s OFFSET %s"
+            )
+
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute(query, (search_param, search_param, length, start))
+            data_dosen = cur.fetchall()
+
+            # Count total data
+            cur.execute("SELECT COUNT(*) FROM dosen")
+            total_data = cur.fetchone()[0]
+
+            # Count filtered data (based on search query)
+            cur.execute(f"SELECT COUNT(*) FROM dosen {search_clause}", 
+                        (search_param, search_param))
+            filtered_data = cur.fetchone()[0]
+
+            cur.close()
+
+            # Prepare the data in DataTables format
+            results = [{
+                "no": start + i + 1,
+                "id_dosen": row[0],
+                "nama_dosen": row[1],
+                "prodi": row[2]
+            } for i, row in enumerate(data_dosen)]
+
+            # Return the JSON response
+            return jsonify({
+                "draw": draw,
+                "recordsTotal": total_data,
+                "recordsFiltered": filtered_data,
+                "data": results
+            })
+        
+        except Exception as e:
+            # Log error for debugging
+            print("Error fetching data:", str(e))
+            return jsonify({"error": "Data fetch error"}), 500
+    
+    return render_template("/dosen/dosen.html")
 
 
 @app.route("/dosen/add", methods=["GET", "POST"])

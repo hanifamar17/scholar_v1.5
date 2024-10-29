@@ -136,6 +136,7 @@ Semua Hasil Pencarian
                         //console.log('Row created', row, data, dataIndex);
                         $(row).addClass('bg-white hover:bg-gray-100'); // menambahkan class untuk <tr>
                         $(row).find('td').each(function (index, td) {
+                            $(row).addClass('hover:bg-gray-100');
                             $(td).addClass('px-6 text-gray-700 border-b');
                             $(td).attr('scope', 'col');
                             $(td).attr('rowspan', 1);                       

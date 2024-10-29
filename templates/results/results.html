@@ -184,6 +184,7 @@ Hasil Pencarian
                     createdRow: function (row, data, dataIndex) {
                         // Debugging: Periksa apakah fungsi ini dipanggil
                         //console.log('Row created', row, data, dataIndex);
+                        $(row).addClass('hover:bg-gray-100');
                         $(row).find('td').each(function (index, td) {
                             $(td).addClass('px-6 text-gray-700 border-b');
                             $(td).css({
