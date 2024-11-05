@@ -524,7 +524,7 @@ def results():
         with open("output.json", 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-         # Ganti nilai None dengan 0
+        # Ganti nilai None dengan 0
         for item in data:
             for key, value in item.items():
                 if value is None:
@@ -534,14 +534,6 @@ def results():
         start = int(request.args.get('start', 0))  # start point
         length = int(request.args.get('length', 10))  # number of records per page
         search_value = request.args.get('search[value]', '')  # search term
-
-        order_column = request.args.get('order[0][column]', '0')  # Default column is query
-        order_dir = request.args.get('order[0][dir]', 'asc')  # Default direction is asc
-
-        if order_column == "0":  # Jika user mengklik kolom query
-            query_direction = order_dir
-        
-
 
         # Filter data berdasarkan search_value
         if search_value:
@@ -559,7 +551,7 @@ def results():
         else:
             filtered_data = data
         
-        filtered_data_sort = sorted(filtered_data, key=lambda x: x.get(query_direction, ''), reverse=(order_dir == 'desc'))
+        filtered_data_sort = sorted(filtered_data, key=lambda x: x["query"])
 
         # Pagination (limit and offset)
         page_data = filtered_data_sort[start:start + length]

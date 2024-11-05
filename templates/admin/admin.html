@@ -32,19 +32,19 @@
             </li>
             <span class="mx-2 text-gray-400">/</span>
             <li aria-current="page"></li>
-                <div class="flex items-center">
-                    <a class="inline-flex items-center py-2 font-normal text-center
+            <div class="flex items-center">
+                <a class="inline-flex items-center py-2 font-normal text-center
                         {% if request.path == '/backup-restore' %}
                         text-yellow-600
                         {% else %}
                         self-center
                         {% endif %}" href="{{ url_for('backup_restore') }}">
-                        <i class="fa-solid fa-database ml-2 mr-2"></i>
-                        <span>Backup & Restore</span>
-                    </a>
-                </div>
+                    <i class="fa-solid fa-database ml-2 mr-2"></i>
+                    <span>Backup & Restore</span>
+                </a>
+            </div>
             </li>
-        </ol>    
+        </ol>
     </nav>
 
     <content id="content-base" class="space-y-4">
@@ -54,12 +54,16 @@
         {% if messages %}
         <ul>
             {% for category, message in messages %}
-            <div class="text-blue-800 text-sm bg-blue-50 border border-blue-500 px-4 py-3 rounded relative mb-2" role="alert">
+            <div class="text-blue-800 text-sm bg-blue-50 border border-blue-500 px-4 py-3 rounded relative mb-2"
+                role="alert">
                 <li class="{{ category }}">{{ message }}</li>
-                <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">
-                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none';">
+                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
                         <title>Close</title>
-                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
                     </svg>
                 </span>
             </div>
@@ -76,9 +80,74 @@
             </div>
         </div>
 
+        <!--Update Modal -->
+        <div id="update-admin">
+            <div id="importModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" onclick="closeModalOutside(event)">
+                <div class="relative top-20 mx-auto p-5 border max-w-xl shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                    <div class="mt-3">
+                        <div class="mt-2 px-7 py-3 space-y-4">
+                            <h3 class="text-2xl leading-6 font-medium text-gray-900">Update Admin</h3>
+                            <form id="updateForm" action="#" method="POST" enctype="multipart/form-data">
+                                <div class="py-8">
+                                    <div
+                                        class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 px-4 py-2 space-y-1">
+                                        <label for="username" class="self-center text-gray-600">Username</label>
+                                        <div class="relative z-0 w-full mb-5">
+                                            <input type="text" name="username" id="username" value="{{ admin[1] }}"
+                                                autocomplete="username" required
+                                                class="pt-3 pb-2 px-3 block w-full mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200" />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 px-4 py-2 space-y-1">
+                                        <label for="password" class="self-center text-gray-600">Password</label>
+                                        <div class="relative z-0 w-full mb-5">
+                                            <input type="text" name="password" id="password" value="{{ admin[2] }}"
+                                                autocomplete="password" required
+                                                class="pt-3 pb-2 px-3 block w-full mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200" />
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between py-4">
+                                        <button type="button" class="border py-2 px-4 rounded"
+                                            onclick="closeModal()">Close</button>
+                                        <button type="submit"
+                                            class="bg-blue-600 hover:bg-blue-800 text-white py-2 px-4 rounded">Update</button>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function openModal(id, username, password) {
+                    document.getElementById('importModal').classList.remove('hidden');
+
+                    // Isi nilai input dengan data yang sesuai
+                    document.getElementById('username').value = username;
+                    document.getElementById('password').value = password;
+
+                    // Atur action pada form dengan URL yang benar
+                    const updateForm = document.getElementById('updateForm');
+                    updateForm.action = `/admin/update/${id}`;
+                }
+
+                function closeModal() {
+                    document.getElementById('importModal').classList.add('hidden');
+                }
+
+                function closeModalOutside(event) {
+                    // Menutup modal jika area di luar modal diklik
+                    if (event.target.id === 'importModal') {
+                        closeModal();
+                    }
+                }
+            </script>
+        </div>
 
         <div id="content-table" class="overflow-x-auto pb-8">
-            <table class="w-full text-sm text-left text-gray-500 " id="dataTable">
+            <table class="w-full text-sm text-left text-gray-500" id="dataTable">
                 <thead class="text-sm text-gray-700 uppercase">
                     <tr class="text-left border-b-2">
                         <th scope="col" class="px-3 py-3">No</th>
@@ -91,35 +160,35 @@
                 <tbody class="text-gray-700">
                     {% for row in admin %}
                     <tr class="border-b">
-                        <td class="px-3 py-2">{{loop.index}}</td>
-                        <td class="px-3 py-2">{{row[1]}}</td>
-                        <td class="px-3 py-2">{{row[2]}}</td>
-                        <td class="px-3 py-2">{{row[4]}}</td>
-                        <td class="flex flex-row space-x-8 py-2">
-                            <div class="flex">
-                                <form action="{{ url_for('admin_update_form', id_admin=row[0]) }}" method="GET">
-                                    <div class="w-5 mr-2 hover:scale-110">
-                                        <button type="submit" class="py-1 px-4"><i type="submit"
-                                                class="fa-solid fa-pen-to-square"></i></button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="flex">
-                                <form action="{{ url_for('admin_delete', id_admin=row[0]) }}" method="POST">
-                                    <div class="w-5 mr-2 hover:scale-110">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit"
-                                            class="py-1 px-4 {{ 'hidden' if loop.index == 1 else '' }}"><i type="submit"
-                                                class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                </form>
-                            </div>
+                        <td class="px-3 py-2">{{ loop.index }}</td>
+                        <td class="px-3 py-2">{{ row[1] }}</td>
+                        <td class="px-3 py-2">{{ row[2] }}</td>
+                        <td class="px-3 py-2">{{ row[4] }}</td>
+                        <td class="flex space-x-4 py-2">
+                            <!--<form action="{{ url_for('admin_update_form', id_admin=row[0]) }}" method="GET">
+                                <div class="w-5 mr-2 hover:scale-110">
+                                    <button type="submit" class="py-1 px-4"><i type="submit"
+                                            class="fa-solid fa-pen-to-square"></i></button>
+                                </div>
+                            </form>-->
+                            <button type="button" onclick="openModal('{{ row[0] }}', '{{ row[1] }}', '{{ row[2] }}')"
+                                class="text-blue-500 hover:scale-110">
+                                &laquo; Update &raquo;
+                            </button>
+                            <!-- Delete form -->
+                            <form action="{{ url_for('admin_delete', id_admin=row[0]) }}" method="POST" class="inline">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="py-1 px-4 {{ 'hidden' if loop.index == 1 else '' }}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
     </content>
 </div>
 
