@@ -42,8 +42,8 @@ app.config["MYSQL_DB"] = "publications"
 mysql = MySQL(app)
 
 #GLOBAL PATH
-MYSQLDUMP_PATH = r'E:\App-Development\1-Tools-Library-Environment\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqldump.exe'
-WKHTMLTOPDF_PATH= r'E:\\App-Development\\1-Tools-Library-Environment\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+MYSQLDUMP_PATH = os.getenv("MYSQLDUMP_PATH")
+WKHTMLTOPDF_PATH = os.getenv("WKHTMLTOPDF_PATH")
 FLASK_PORT=5000
     
 #ERROR HANDLING GLOBAL
@@ -177,11 +177,11 @@ def restore():
         file.save(filepath)
 
         # Perintah mysql untuk restore (gunakan path lengkap)
+        mysql_path = os.getenv("MYSQL_BIN_PATH")
         mysql_cmd = [
-            r'E:\App-Development\1-Tools-Library-Environment\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysql.exe',  # Path ke mysql
+            os.path.normpath(mysql_path),
             '-h', app.config["MYSQL_HOST"],
             '-u', app.config["MYSQL_USER"],
-            f'-p{app.config["MYSQL_PASSWORD"]}',
             app.config['MYSQL_DB']
         ]
 
