@@ -23,12 +23,12 @@ Semua Hasil Pencarian
 
         <div class="p-4 text-green-800 rounded-lg bg-green-50" role="alert">
             <span class="font-normal">Menampilkan publikasi ilmiah untuk:
-                <a class="font-medium capitalize">'{{ author }}'</a>
+                <a class="font-medium capitalize">'{{ query }}'</a>
             </span>
         </div>
 
         <div class="flex flex-row space-x-4 justify-between">
-            <form method="POST" action="{{ url_for('all_results_search_author') }}">
+            <form method="GET" action="{{ url_for('all_results_search_author') }}">
                 <div class="flex flex-row space-x-4 py-4 text-sm">
                     <label for="search_author" class="self-center">Tampilkan Author:</label>
                     <select id="search_author" name="query"
@@ -46,7 +46,7 @@ Semua Hasil Pencarian
             </form>
             <div class="flex flex-row items-center space-x-3">
                 <form method="GET" action="{{ url_for('search_author_download_excel') }}">
-                    <input type="hidden" name="query" value="{{ author }}">
+                    <input type="hidden" name="query" value="{{ query }}">
                     <button type="submit"
                         class="bg-green-600 hover:bg-green-700 text-white focus:ring-4 focus:ring-green-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
                         <i class="fa-solid fa-file-excel"></i>
@@ -54,7 +54,7 @@ Semua Hasil Pencarian
                     </button>
                 </form>
                 <form method="GET" action="{{ url_for('search_author_preview_pdf') }}" target="_blank">
-                    <input type="hidden" name="query" value="{{ author }}">
+                    <input type="hidden" name="query" value="{{ query }}">
                     <button
                         class="bg-red-600 hover:bg-red-700 text-white focus:ring-4 focus:ring-red-300 font-medium rounded-sm shadow-md text-sm px-5 py-2 inline-flex items-center space-x-2">
                         <i class="fa-solid fa-file-pdf"></i>
@@ -92,6 +92,7 @@ Semua Hasil Pencarian
         <script>
             $(document).ready(function () {
                 let prevQueryDir = 'asc'; // Untuk menyimpan arah sorting terakhir kolom query
+                let queryParam = "{{ query }}";
 
                 $('#dataTable').DataTable({
                     "responsive": true,
@@ -101,6 +102,9 @@ Semua Hasil Pencarian
                         "url": "/all_results/search-author",
                         "type": "GET",
                         data: function (d) {
+                            // Tambahkan parameter 'query' dari Flask ke permintaan Ajax DataTables
+                            d.query = queryParam;
+
                             // Tambahkan informasi sorting sebelumnya ke request
                             d.prev_query_dir = prevQueryDir;
                             return d;

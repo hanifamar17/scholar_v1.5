@@ -863,11 +863,11 @@ def all_results():
             order_by = f"query {query_direction}, publication_year {year_direction}"
             
             # Debug: Print sorting parameters
-            print(f"Clicked Column: {order_column}")
-            print(f"Click Direction: {order_dir}")
-            print(f"Query Direction: {query_direction}")
-            print(f"Year Direction: {year_direction}")
-            print(f"Final ORDER BY: {order_by}")
+            #print(f"Clicked Column: {order_column}")
+            #print(f"Click Direction: {order_dir}")
+            #print(f"Query Direction: {query_direction}")
+            #print(f"Year Direction: {year_direction}")
+            #print(f"Final ORDER BY: {order_by}")
             
             # Query with searching
             search_clause = f"WHERE query LIKE %s OR author LIKE %s OR title LIKE %s OR cited_by_value LIKE %s OR publication_year LIKE %s"
@@ -1193,15 +1193,14 @@ def all_results_preview_pdf():
 #    )
 @app.route("/all_results/search-author", methods=["GET", "POST"])
 def all_results_search_author():
-    try:    
-        if request.method == "POST":
-            author = request.form.get("query", "")
-            session['author'] = author
-            return redirect(url_for('all_results_search_author'))
+    try:     
+        query_param = request.args.get("query", "")
+            #session['author'] = author
         
         if request.args.get('draw'):
-            author = session.get("author", "")
-            print("Author:", author)
+            #query_param = request.args.get("query", "")
+            #author = session.get("author", "")
+            print("Author:", query_param)
             
             #parameter datatables
             draw = request.args.get('draw')
@@ -1229,11 +1228,11 @@ def all_results_search_author():
             query = f"SELECT * FROM publikasi {search_clause} ORDER BY {order_by} LIMIT %s OFFSET %s"
     
             cur = mysql.connection.cursor()
-            cur.execute(query, (author, search_param, search_param, search_param, search_param, length, start))
+            cur.execute(query, (query_param, search_param, search_param, search_param, search_param, length, start))
             data = cur.fetchall()
     
             print("SQL Query:", query)
-            print("Parameters:", (author, search_param, search_param, search_param, search_param, length, start))
+            print("Parameters:", (query_param, search_param, search_param, search_param, search_param, length, start))
     
             # mengganti nilai None dengan '0'
             data = [[0 if value is None else value for value in row] for row in data]
@@ -1244,7 +1243,7 @@ def all_results_search_author():
     
             # Query untuk menghitung data yang difilter
             cur.execute(f"SELECT COUNT(*) FROM publikasi {search_clause}", 
-                            (author, search_param, search_param, search_param, search_param))
+                            (query_param, search_param, search_param, search_param, search_param))
             total_filtered_data = cur.fetchone()[0]
     
             results = [{
@@ -1266,8 +1265,8 @@ def all_results_search_author():
                     "data": results,
             })
         
-        author = session.get("author", "")
-        return render_template("results/search_author_results.html", author=author)
+        #query_param = request.args.get("query", "")
+        return render_template("results/search_author_results.html", query=query_param)
                
     except Exception as e:
         print(f"Error: {e}")
